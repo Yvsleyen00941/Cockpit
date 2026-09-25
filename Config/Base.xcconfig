@@ -1,0 +1,10 @@
+// Shared build settings.
+//
+// Your personal team from Xcode. Free provisioning works for everything
+// except remote Live Activity pushes (APNs needs a paid membership) — and iOS
+// builds signed this way expire after 7 days, so re-run from Xcode weekly.
+DEVELOPMENT_TEAM = 34LM5DW4G4
+CODE_SIGN_STYLE = Automatic
+
+// Optional per-machine overrides (git-ignored).
+#include? "Local.xcconfig"

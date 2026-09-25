@@ -1,0 +1,682 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0B718232C4A78D58A8F08826 /* CCNet in Frameworks */ = {isa = PBXBuildFile; productRef = 197B394B88B4D61FB8D67AB3 /* CCNet */; };
+		13C49BB8ACEDDB1B084E9C1E /* CCCore in Frameworks */ = {isa = PBXBuildFile; productRef = 867F835949A2831A3869E952 /* CCCore */; };
+		36C6F95AF25047CB6ADF72FE /* CCCore in Frameworks */ = {isa = PBXBuildFile; productRef = 5A659CA6463AE03BA0E17F9F /* CCCore */; };
+		5C78D11D6B622FCA6FB76FEB /* CCCore in Frameworks */ = {isa = PBXBuildFile; productRef = 9BD0467922AF83AE5BF08312 /* CCCore */; };
+		60AC3554B8AB3C517CE7F96B /* CCNet in Frameworks */ = {isa = PBXBuildFile; productRef = 3DFC1A51306C35D8758D6BC3 /* CCNet */; };
+		643367471AC3CB4C1798BD60 /* CCNet in Frameworks */ = {isa = PBXBuildFile; productRef = 3F7452A3C591063CD74F67B2 /* CCNet */; };
+		80405AE6E3F6F54EAA6F34ED /* ControlCenterWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 8DC6401AB490A674AC49A17B /* ControlCenterWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		5501D2F9E05B5C83C87E45C5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4298248F3E34F4FC170C3F06 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2EB8EE16B29F106A4E14A623;
+			remoteInfo = ControlCenterWidgets;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		DD3CA166592DBF333399AF1B /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				80405AE6E3F6F54EAA6F34ED /* ControlCenterWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		52B912375892B2C330622D3F /* ControlCenterHelper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ControlCenterHelper.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8DC6401AB490A674AC49A17B /* ControlCenterWidgets.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ControlCenterWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		9CF7C9929DC5C434BC558E98 /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
+		C7A7D3F28B11B7EE472540E9 /* ControlCenter.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ControlCenter.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E149E9152E16BDF28B7AB641 /* ControlCenterKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ControlCenterKit; path = Packages/ControlCenterKit; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		1855F12CA9A053F9677C5BE0 /* Apps/Widgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = Apps/Widgets;
+			sourceTree = "<group>";
+		};
+		B5AF1E57A956C9BB4B6AB73A /* Apps/Helper */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = Apps/Helper;
+			sourceTree = "<group>";
+		};
+		C787542140EF90BA8275DA36 /* Apps/iOS */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = Apps/iOS;
+			sourceTree = "<group>";
+		};
+		C7D266B61CE1C2827927146C /* Apps/Shared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = Apps/Shared;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		0CBFD1E5EE620D0234F6EE1A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				36C6F95AF25047CB6ADF72FE /* CCCore in Frameworks */,
+				643367471AC3CB4C1798BD60 /* CCNet in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		72067DD6D281110B7A919385 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5C78D11D6B622FCA6FB76FEB /* CCCore in Frameworks */,
+				60AC3554B8AB3C517CE7F96B /* CCNet in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B5454C5E2DDC9093C22200BD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				13C49BB8ACEDDB1B084E9C1E /* CCCore in Frameworks */,
+				0B718232C4A78D58A8F08826 /* CCNet in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		149860D475CE115BF80058B8 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C7A7D3F28B11B7EE472540E9 /* ControlCenter.app */,
+				52B912375892B2C330622D3F /* ControlCenterHelper.app */,
+				8DC6401AB490A674AC49A17B /* ControlCenterWidgets.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		32303C3B9B3D81CE7FCE7A8A /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				E149E9152E16BDF28B7AB641 /* ControlCenterKit */,
+			);
+			path = Packages;
+			sourceTree = "<group>";
+		};
+		AB8FECF169D0CFBA56D78C30 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				9CF7C9929DC5C434BC558E98 /* Base.xcconfig */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		B4083375BCBE6B8F983CFA96 = {
+			isa = PBXGroup;
+			children = (
+				B5AF1E57A956C9BB4B6AB73A /* Apps/Helper */,
+				C787542140EF90BA8275DA36 /* Apps/iOS */,
+				C7D266B61CE1C2827927146C /* Apps/Shared */,
+				1855F12CA9A053F9677C5BE0 /* Apps/Widgets */,
+				AB8FECF169D0CFBA56D78C30 /* Config */,
+				32303C3B9B3D81CE7FCE7A8A /* Packages */,
+				149860D475CE115BF80058B8 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		10058C0A82F1ABE61B36BD86 /* ControlCenter */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 77378437ACCE4E1B657D8F9D /* Build configuration list for PBXNativeTarget "ControlCenter" */;
+			buildPhases = (
+				E4FD4D0EABC749511A8B8DE0 /* Sources */,
+				7A0BAAFD40C5ED4FAC054E65 /* Resources */,
+				72067DD6D281110B7A919385 /* Frameworks */,
+				DD3CA166592DBF333399AF1B /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5A040E3B5EFACE19BA95D346 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				C7D266B61CE1C2827927146C /* Apps/Shared */,
+				C787542140EF90BA8275DA36 /* Apps/iOS */,
+			);
+			name = ControlCenter;
+			packageProductDependencies = (
+				9BD0467922AF83AE5BF08312 /* CCCore */,
+				3DFC1A51306C35D8758D6BC3 /* CCNet */,
+			);
+			productName = ControlCenter;
+			productReference = C7A7D3F28B11B7EE472540E9 /* ControlCenter.app */;
+			productType = "com.apple.product-type.application";
+		};
+		2EB8EE16B29F106A4E14A623 /* ControlCenterWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BAD431A35ECFF4AFE67E908A /* Build configuration list for PBXNativeTarget "ControlCenterWidgets" */;
+			buildPhases = (
+				C488CFAC2E65BB7CD98F66FD /* Sources */,
+				C8749895AF974751B6F42F0E /* Resources */,
+				0CBFD1E5EE620D0234F6EE1A /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				C7D266B61CE1C2827927146C /* Apps/Shared */,
+				1855F12CA9A053F9677C5BE0 /* Apps/Widgets */,
+			);
+			name = ControlCenterWidgets;
+			packageProductDependencies = (
+				5A659CA6463AE03BA0E17F9F /* CCCore */,
+				3F7452A3C591063CD74F67B2 /* CCNet */,
+			);
+			productName = ControlCenterWidgets;
+			productReference = 8DC6401AB490A674AC49A17B /* ControlCenterWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		BC14955DB6D41834E97F5140 /* ControlCenterHelper */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A3B9EAC7030FF0F334E032C1 /* Build configuration list for PBXNativeTarget "ControlCenterHelper" */;
+			buildPhases = (
+				25D95C851EC59667128EC066 /* Sources */,
+				CA943A48A0D96A1CE348E4A8 /* Resources */,
+				B5454C5E2DDC9093C22200BD /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				B5AF1E57A956C9BB4B6AB73A /* Apps/Helper */,
+			);
+			name = ControlCenterHelper;
+			packageProductDependencies = (
+				867F835949A2831A3869E952 /* CCCore */,
+				197B394B88B4D61FB8D67AB3 /* CCNet */,
+			);
+			productName = ControlCenterHelper;
+			productReference = 52B912375892B2C330622D3F /* ControlCenterHelper.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		4298248F3E34F4FC170C3F06 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					10058C0A82F1ABE61B36BD86 = {
+						DevelopmentTeam = 34LM5DW4G4;
+						ProvisioningStyle = Automatic;
+					};
+					2EB8EE16B29F106A4E14A623 = {
+						DevelopmentTeam = 34LM5DW4G4;
+						ProvisioningStyle = Automatic;
+					};
+					BC14955DB6D41834E97F5140 = {
+						DevelopmentTeam = 34LM5DW4G4;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = D6B9FDF0CF56E3D0E8F66E79 /* Build configuration list for PBXProject "ControlCenter" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = B4083375BCBE6B8F983CFA96;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				7184E620030060C0DB170298 /* XCLocalSwiftPackageReference "Packages/ControlCenterKit" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 149860D475CE115BF80058B8 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				10058C0A82F1ABE61B36BD86 /* ControlCenter */,
+				2EB8EE16B29F106A4E14A623 /* ControlCenterWidgets */,
+				BC14955DB6D41834E97F5140 /* ControlCenterHelper */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		7A0BAAFD40C5ED4FAC054E65 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C8749895AF974751B6F42F0E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CA943A48A0D96A1CE348E4A8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		25D95C851EC59667128EC066 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C488CFAC2E65BB7CD98F66FD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E4FD4D0EABC749511A8B8DE0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		5A040E3B5EFACE19BA95D346 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2EB8EE16B29F106A4E14A623 /* ControlCenterWidgets */;
+			targetProxy = 5501D2F9E05B5C83C87E45C5 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		1274D59BE4F7A0D1EAD5BBDE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Config/Helper/Helper.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = Config/Helper/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = be.yorben.controlcenter.helper;
+				PRODUCT_NAME = "ControlCenter Helper";
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		223604CFF35ABFC0BFD0DAD4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9CF7C9929DC5C434BC558E98 /* Base.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		61A32111631496C2E517BE47 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Config/Helper/Helper.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = Config/Helper/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = be.yorben.controlcenter.helper;
+				PRODUCT_NAME = "ControlCenter Helper";
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		659F7173243219FED79D739B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Config/iOS/ControlCenter.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = Config/iOS/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = be.yorben.controlcenter;
+				PRODUCT_NAME = ControlCenter;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		A13FE7BC6534B6BC54806D4E /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9CF7C9929DC5C434BC558E98 /* Base.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		A33173B050D910F1682639C3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = Config/Widgets/Widgets.entitlements;
+				INFOPLIST_FILE = Config/Widgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = be.yorben.controlcenter.widgets;
+				PRODUCT_NAME = ControlCenterWidgets;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		BA0F1ADFDC81E93A1C433318 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = Config/Widgets/Widgets.entitlements;
+				INFOPLIST_FILE = Config/Widgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = be.yorben.controlcenter.widgets;
+				PRODUCT_NAME = ControlCenterWidgets;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F31C0D78A46F892FF3F36BBC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Config/iOS/ControlCenter.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = Config/iOS/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = be.yorben.controlcenter;
+				PRODUCT_NAME = ControlCenter;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		77378437ACCE4E1B657D8F9D /* Build configuration list for PBXNativeTarget "ControlCenter" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F31C0D78A46F892FF3F36BBC /* Debug */,
+				659F7173243219FED79D739B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A3B9EAC7030FF0F334E032C1 /* Build configuration list for PBXNativeTarget "ControlCenterHelper" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				61A32111631496C2E517BE47 /* Debug */,
+				1274D59BE4F7A0D1EAD5BBDE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		BAD431A35ECFF4AFE67E908A /* Build configuration list for PBXNativeTarget "ControlCenterWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BA0F1ADFDC81E93A1C433318 /* Debug */,
+				A33173B050D910F1682639C3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		D6B9FDF0CF56E3D0E8F66E79 /* Build configuration list for PBXProject "ControlCenter" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				223604CFF35ABFC0BFD0DAD4 /* Debug */,
+				A13FE7BC6534B6BC54806D4E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		7184E620030060C0DB170298 /* XCLocalSwiftPackageReference "Packages/ControlCenterKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/ControlCenterKit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		197B394B88B4D61FB8D67AB3 /* CCNet */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CCNet;
+		};
+		3DFC1A51306C35D8758D6BC3 /* CCNet */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CCNet;
+		};
+		3F7452A3C591063CD74F67B2 /* CCNet */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CCNet;
+		};
+		5A659CA6463AE03BA0E17F9F /* CCCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CCCore;
+		};
+		867F835949A2831A3869E952 /* CCCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CCCore;
+		};
+		9BD0467922AF83AE5BF08312 /* CCCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CCCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 4298248F3E34F4FC170C3F06 /* Project object */;
+}

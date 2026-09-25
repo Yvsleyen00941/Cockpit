@@ -1,0 +1,203 @@
+name: ControlCenter
+options:
+  bundleIdPrefix: be.yorben
+  deploymentTarget:
+    iOS: "17.0"
+    macOS: "14.0"
+  developmentLanguage: en
+  generateEmptyDirectories: true
+  groupSortPosition: top
+configFiles:
+  Debug: Config/Base.xcconfig
+  Release: Config/Base.xcconfig
+packages:
+  ControlCenterKit:
+    path: Packages/ControlCenterKit
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    DEAD_CODE_STRIPPING: YES
+    SWIFT_EMIT_LOC_STRINGS: NO
+    ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
+
+targets:
+  # ── iPad (primary) + iPhone companion ────────────────────────────────
+  ControlCenter:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Apps/iOS
+        type: syncedFolder
+      - path: Apps/Shared
+        type: syncedFolder
+    dependencies:
+      - package: ControlCenterKit
+        product: CCCore
+      - package: ControlCenterKit
+        product: CCNet
+      - target: ControlCenterWidgets
+        embed: true
+    info:
+      path: Config/iOS/Info.plist
+      properties:
+        CFBundleDisplayName: Control Center
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSRequiresIPhoneOS: true
+        UILaunchScreen:
+          UIColorName: LaunchBackground
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UISupportedInterfaceOrientations~iphone:
+          - UIInterfaceOrientationPortrait
+        UIRequiresFullScreen: true
+        UIStatusBarHidden: true
+        UIApplicationSupportsIndirectInputEvents: true
+        NSLocalNetworkUsageDescription: Control Center finds and talks to Control Center Helper on your Mac over your local network.
+        NSBonjourServices:
+          - _ccontrol._tcp
+        NSSupportsLiveActivities: true
+        NSSupportsLiveActivitiesFrequentUpdates: true
+        UIBackgroundModes:
+          - fetch
+        BGTaskSchedulerPermittedIdentifiers:
+          - be.yorben.controlcenter.refresh
+        CFBundleURLTypes:
+          - CFBundleURLName: be.yorben.controlcenter
+            CFBundleURLSchemes:
+              - controlcenter
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+    entitlements:
+      path: Config/iOS/ControlCenter.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.be.yorben.controlcenter
+        keychain-access-groups:
+          - $(AppIdentifierPrefix)be.yorben.controlcenter.shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: be.yorben.controlcenter
+        PRODUCT_NAME: ControlCenter
+        TARGETED_DEVICE_FAMILY: "1,2"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        ENABLE_PREVIEWS: YES
+        SUPPORTS_MACCATALYST: NO
+        SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD: NO
+        SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: NO
+
+  # ── Home Screen widgets, Live Activity, Control Center controls ───────
+  ControlCenterWidgets:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Apps/Widgets
+        type: syncedFolder
+      - path: Apps/Shared
+        type: syncedFolder
+    dependencies:
+      - package: ControlCenterKit
+        product: CCCore
+      - package: ControlCenterKit
+        product: CCNet
+    info:
+      path: Config/Widgets/Info.plist
+      properties:
+        CFBundleDisplayName: Control Center Widgets
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+        NSLocalNetworkUsageDescription: Widgets refresh from Control Center Helper on your Mac.
+        NSBonjourServices:
+          - _ccontrol._tcp
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+    entitlements:
+      path: Config/Widgets/Widgets.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.be.yorben.controlcenter
+        keychain-access-groups:
+          - $(AppIdentifierPrefix)be.yorben.controlcenter.shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: be.yorben.controlcenter.widgets
+        PRODUCT_NAME: ControlCenterWidgets
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SKIP_INSTALL: YES
+        ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME: WidgetBackground
+
+  # ── macOS menu-bar hub ────────────────────────────────────────────────
+  ControlCenterHelper:
+    type: application
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: Apps/Helper
+        type: syncedFolder
+    dependencies:
+      - package: ControlCenterKit
+        product: CCCore
+      - package: ControlCenterKit
+        product: CCNet
+    info:
+      path: Config/Helper/Info.plist
+      properties:
+        CFBundleDisplayName: ControlCenter Helper
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSUIElement: true
+        LSMinimumSystemVersion: $(MACOSX_DEPLOYMENT_TARGET)
+        LSApplicationCategoryType: public.app-category.productivity
+        NSHumanReadableCopyright: © 2026 Yorben
+        NSAppleEventsUsageDescription: ControlCenter Helper controls Spotify, Music, Safari, Xcode and Terminal when you tap keys on your iPad.
+        NSCalendarsFullAccessUsageDescription: ControlCenter Helper shows today's schedule and your next event on your iPad.
+        NSRemindersFullAccessUsageDescription: ControlCenter Helper can mirror your top three priorities to Reminders.
+        NSLocalNetworkUsageDescription: Lets your iPad and iPhone find and connect to this Mac.
+        NSBonjourServices:
+          - _ccontrol._tcp
+    entitlements:
+      path: Config/Helper/Helper.entitlements
+      properties:
+        com.apple.security.automation.apple-events: true
+        com.apple.security.personal-information.calendars: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: be.yorben.controlcenter.helper
+        PRODUCT_NAME: ControlCenter Helper
+        ENABLE_HARDENED_RUNTIME: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        COMBINE_HIDPI_IMAGES: YES
+        ENABLE_PREVIEWS: YES
+
+schemes:
+  ControlCenter:
+    build:
+      targets:
+        ControlCenter: all
+        ControlCenterWidgets: all
+    run:
+      config: Debug
+      executable: ControlCenter
+    archive:
+      config: Release
+  ControlCenterHelper:
+    build:
+      targets:
+        ControlCenterHelper: all
+    run:
+      config: Debug
+      executable: ControlCenterHelper
+    archive:
+      config: Release
