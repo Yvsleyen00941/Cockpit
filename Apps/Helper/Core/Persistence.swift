@@ -4,7 +4,8 @@ import Foundation
 enum Paths {
     static let support: URL = {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        let url = base.appendingPathComponent("ControlCenter", isDirectory: true)
+        let folder = "ControlCenter" + (ProcessInfo.processInfo.environment["CC_INSTANCE"].map { "-\($0)" } ?? "")
+        let url = base.appendingPathComponent(folder, isDirectory: true)
         try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
         return url
     }()

@@ -80,8 +80,10 @@ final class Hub {
             self?.accept(NWByteStream(connection), transport: .wifi)
         }
         server.start()
-        localAPI.start()
-        usb.start()
+        if MacInfo.instance == nil {
+            localAPI.start()
+            usb.start()
+        }
 
         // Event-driven, effectively free: always on.
         context.start()
@@ -301,6 +303,7 @@ final class Hub {
                 record.session.send(.liveDataUpdate(LiveDataUpdate(values: [value], full: false)))
             }
         }
+        if channel == .timers { MenuBarTicker.shared.update(state.timers) }
         switch channel {
         case .bot, .timers, .whoop:
             apns.stateChanged(state)
@@ -542,7 +545,7 @@ struct ActionOrigin: Sendable {
 
 /// Secrets live in the helper's Keychain, never in JSON.
 enum Secrets {
-    private static let keychain = Keychain(service: "be.yorben.controlcenter.helper.secrets")
+    private static let keychain = SecretStore(service: "be.yorben.controlcenter.helper.secrets")
 
     static func get(_ key: String) -> String? { keychain.string(key) }
 

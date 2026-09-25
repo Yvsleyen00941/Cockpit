@@ -41,7 +41,7 @@ final class CalendarProvider: PollingProvider {
     }
 
     override func tick() async {
-        if access == .notDetermined { await requestAccess() }
+        if access == .notDetermined, !MacInfo.isTestRun { await requestAccess() }
         guard access == .granted else {
             Hub.shared.publish(.calendar(CalendarState(access: access, events: [])))
             return

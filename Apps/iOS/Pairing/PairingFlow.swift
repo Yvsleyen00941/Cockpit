@@ -28,7 +28,7 @@ struct PairingFlow: View {
                         case .enterCode(let name, let attempt):
                             CodeEntry(macName: name, attempt: attempt)
                         case .verifying:
-                            progress("Verifying…")
+                            progress("Confirming with your Mac…")
                         case .success(let name):
                             success(name)
                         }

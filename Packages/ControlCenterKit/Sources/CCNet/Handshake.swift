@@ -148,7 +148,14 @@ public enum ClientHandshake {
 
     /// Pairs with a Mac. `enterCode` is called when the Mac is showing its
     /// code; it returns what the user typed (called again after a typo).
-    public static func pair(channel: MessageChannel, device: DeviceIdentity, enterCode: @Sendable (_ attempt: Int) async throws -> String) async throws -> PairedMac {
+    /// `codeAccepted` fires once the typed code matches, while the Mac stores
+    /// the key — that can take a while if macOS asks about Keychain access.
+    public static func pair(
+        channel: MessageChannel,
+        device: DeviceIdentity,
+        codeAccepted: (@Sendable () async -> Void)? = nil,
+        enterCode: @Sendable (_ attempt: Int) async throws -> String
+    ) async throws -> PairedMac {
         let ephemeral = Curve25519.KeyAgreement.PrivateKey()
         let initiatorKey = ephemeral.publicKey.rawRepresentation
         let initiatorNonce = CCRandom.bytes(32)
@@ -180,8 +187,9 @@ public enum ClientHandshake {
             }
         }
 
+        await codeAccepted?()
         try await channel.send(.pairConfirm(PairConfirm(mac: PairingCrypto.confirmation(key: keys.confirm, role: .initiator, transcript: transcript))))
-        let resultMessage = try await channel.receive(timeout: 20)
+        let resultMessage = try await channel.receive(timeout: 60)
         guard case .pairResult(let result) = resultMessage.body else { throw HandshakeError.unexpected(resultMessage.type.rawValue) }
         guard result.ok else { throw HandshakeError.pairingRejected(result.reason ?? "The Mac declined.") }
         guard let mac = result.mac, PairingCrypto.verifyConfirmation(mac, key: keys.confirm, role: .responder, transcript: transcript) else {

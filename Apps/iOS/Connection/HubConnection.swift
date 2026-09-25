@@ -3,6 +3,9 @@ import CCNet
 import Foundation
 @preconcurrency import Network
 import Observation
+import os
+
+private let linkLog = Logger(subsystem: "be.yorben.controlcenter", category: "link")
 
 enum LinkStatus: Equatable {
     case idle
@@ -94,7 +97,9 @@ final class HubConnection: HubLink {
         case failed(String)
     }
 
-    private(set) var status: LinkStatus = .idle
+    private(set) var status: LinkStatus = .idle {
+        didSet { if status != oldValue { linkLog.info("status \(String(describing: oldValue), privacy: .public) → \(String(describing: self.status), privacy: .public)") } }
+    }
     private(set) var transport: LinkTransport = .wifi
     private(set) var latencyMs: Double?
     private(set) var macName: String?
@@ -113,7 +118,8 @@ final class HubConnection: HubLink {
     private var connectLoop: Task<Void, Never>?
     private var pingLoop: Task<Void, Never>?
     private var pairingTask: Task<Void, Never>?
-    private var codeContinuation: CheckedContinuation<String, Error>?
+    private var pairingAttempt: (token: UUID, macID: String)?
+    private var pendingCode: (token: UUID, continuation: CheckedContinuation<String, Error>)?
     private var backoff: TimeInterval = 3
     private var wake: CheckedContinuation<Void, Never>?
     private var nextID: UInt32 = 1
@@ -304,6 +310,8 @@ final class HubConnection: HubLink {
     }
 
     private func ended(_ ended: LiveSession, error: Error) {
+        linkLog.info("session ended: \(String(describing: error), privacy: .public)")
+        ended.close()
         guard session === ended else { return }
         session = nil
         pingLoop?.cancel()
@@ -382,57 +390,106 @@ final class HubConnection: HubLink {
     // MARK: Pairing
 
     func pair(with mac: MacBrowser.Result) {
-        pairingTask?.cancel()
+        // A double tap must not open a second handshake next to the first one.
+        if pairingAttempt?.macID == mac.id { return }
+        abortPairing()
+        let token = UUID()
+        pairingAttempt = (token, mac.id)
         pairingTask = Task { @MainActor [weak self] in
             guard let self else { return }
+            // Only the current attempt may touch the UI; a superseded one just cleans up.
+            var isCurrent: Bool { self.pairingAttempt?.token == token }
+            defer {
+                if isCurrent {
+                    self.pairingTask = nil
+                    self.pairingAttempt = nil
+                }
+            }
             self.pairing = .connecting(mac.name)
+            var stage = "connect"
+            let stream = NWByteStream(NWConnection(to: mac.endpoint, using: .controlCenter()))
             do {
-                let stream = NWByteStream(NWConnection(to: mac.endpoint, using: .controlCenter()))
                 try await stream.start(timeout: 6)
                 let channel = MessageChannel(stream: stream)
                 let device = self.device
-                var record = try await ClientHandshake.pair(channel: channel, device: device) { [weak self] attempt in
+                stage = "pair"
+                var record = try await ClientHandshake.pair(channel: channel, device: device, codeAccepted: { [weak self] in
+                    await self?.codeAccepted(token: token)
+                }, enterCode: { [weak self] attempt in
                     guard let self else { throw CancellationError() }
-                    return try await self.awaitCode(attempt: attempt, macName: mac.name)
-                }
-                self.pairing = .verifying
+                    return try await self.awaitCode(attempt: attempt, macName: mac.name, token: token)
+                })
+                stage = "verify"
                 record.serviceName = mac.name
                 if case .hostPort(let host, let port) = stream.remoteEndpoint {
                     record.lastHost = Self.describe(host)
                     record.lastPort = port.rawValue
                 }
                 self.remember(record)
+                stage = "authenticate"
                 _ = try await ClientHandshake.authenticate(channel: channel, device: device, mac: record, transport: .wifi)
+                try Task.checkCancellation()
                 self.pairing = .success(record.macName)
                 self.connectLoop?.cancel()
                 self.connectLoop = nil
                 self.activate(channel, transport: .wifi, mac: record)
             } catch is CancellationError {
-                self.pairing = .none
+                stream.close()
+                if isCurrent { self.pairing = .none }
             } catch {
-                self.pairing = .failed(error.localizedDescription)
+                stream.close()
+                linkLog.error("pairing failed during \(stage, privacy: .public): \(String(describing: error), privacy: .public)")
+                if isCurrent {
+                    self.pairing = .failed("\(error.localizedDescription) (while trying to \(stage))")
+                }
             }
         }
     }
 
-    private func awaitCode(attempt: Int, macName: String) async throws -> String {
+    private func awaitCode(attempt: Int, macName: String, token: UUID) async throws -> String {
         pairing = .enterCode(macName: macName, attempt: attempt)
-        return try await withCheckedThrowingContinuation { continuation in
-            codeContinuation = continuation
+        return try await withTaskCancellationHandler {
+            try await withCheckedThrowingContinuation { continuation in
+                if Task.isCancelled {
+                    continuation.resume(throwing: CancellationError())
+                } else {
+                    pendingCode = (token, continuation)
+                }
+            }
+        } onCancel: {
+            Task { @MainActor [weak self] in self?.failPendingCode(token: token) }
         }
     }
 
+    /// The code matched; the Mac is now storing the key.
+    private func codeAccepted(token: UUID) {
+        guard pairingAttempt?.token == token else { return }
+        pairing = .verifying
+    }
+
+    /// Fails the open code prompt — only `token`'s, when given.
+    private func failPendingCode(token: UUID? = nil) {
+        guard let pending = pendingCode, token == nil || pending.token == token else { return }
+        pendingCode = nil
+        pending.continuation.resume(throwing: CancellationError())
+    }
+
+    /// Stops an in-flight pairing: fails the pending code prompt and closes its connection.
+    private func abortPairing() {
+        failPendingCode()
+        pairingTask?.cancel()
+        pairingTask = nil
+        pairingAttempt = nil
+    }
+
     func submitCode(_ code: String) {
-        let continuation = codeContinuation
-        codeContinuation = nil
-        continuation?.resume(returning: code)
+        let pending = pendingCode
+        pendingCode = nil
+        pending?.continuation.resume(returning: code)
     }
 
     func cancelPairing() {
-        let continuation = codeContinuation
-        codeContinuation = nil
-        continuation?.resume(throwing: CancellationError())
-        pairingTask?.cancel()
+        abortPairing()
         pairing = .none
     }
 
@@ -464,13 +521,15 @@ final class HubConnection: HubLink {
     // MARK: Paired Macs
 
     private func remember(_ mac: PairedMac) {
-        SharedStore.upsert(mac)
-        pairedMacs = SharedStore.pairedMacs
+        var macs = pairedMacs.filter { $0.macID != mac.macID }
+        macs.insert(mac, at: 0)
+        pairedMacs = macs
+        SharedStore.savePairedMacs(macs)
     }
 
     func forget(_ macID: String) {
-        SharedStore.forget(macID)
-        pairedMacs = SharedStore.pairedMacs
+        pairedMacs.removeAll { $0.macID == macID }
+        SharedStore.savePairedMacs(pairedMacs)
         if currentMac?.macID == macID {
             session?.close()
             session = nil

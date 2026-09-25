@@ -9,7 +9,7 @@ final class HubServer {
     private var listener: NWListener?
     private(set) var port: UInt16?
     private(set) var isListening = false
-    private var useAnyPort = false
+    private var useAnyPort = MacInfo.instance != nil
     var onConnection: ((NWConnection) -> Void)?
 
     func start() {

@@ -45,6 +45,7 @@ final class GitProvider: PollingProvider {
 
     private func probeXcode() async {
         lastXcodeProbe = .now
+        guard !MacInfo.isTestRun else { return }
         let script = """
         with timeout of 2 seconds
         tell application id "com.apple.dt.Xcode" to return path of active workspace document

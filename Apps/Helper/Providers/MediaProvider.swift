@@ -53,6 +53,7 @@ final class MediaProvider: PollingProvider {
     }
 
     override func tick() async {
+        guard !MacInfo.isTestRun else { return }
         let running = Set(NSWorkspace.shared.runningApplications.compactMap(\.bundleIdentifier))
         var candidates: [NowPlaying] = []
         if running.contains(MediaSource.spotify.bundleID), let track = await spotify() { candidates.append(track) }

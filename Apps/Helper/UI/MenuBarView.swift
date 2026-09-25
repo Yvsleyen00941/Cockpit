@@ -167,15 +167,9 @@ struct MenuBarView: View {
                     .foregroundStyle(HelperPalette.secondary)
             }
             Spacer()
-            Group {
-                if timer.state == .running, let end = timer.endsAt {
-                    Text(timerInterval: Date.now...max(Date.now, end), countsDown: true)
-                } else {
-                    Text(Fmt.countdown(timer.remaining(at: .now)))
-                }
-            }
-            .font(.system(size: 20, weight: .semibold).monospacedDigit())
-            .foregroundStyle(HelperPalette.primary)
+            Text(MenuBarTicker.shared.text ?? Fmt.countdown(timer.remaining(at: .now)))
+                .font(.system(size: 20, weight: .semibold).monospacedDigit())
+                .foregroundStyle(HelperPalette.primary)
             Button {
                 Task { _ = await hub.timers.handle(TimerCommand(.toggle)) }
             } label: {

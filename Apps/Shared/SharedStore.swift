@@ -34,11 +34,13 @@ enum SharedStore {
     static var deviceIdentity: DeviceIdentity {
         let keychain = self.keychain
         let deviceID: String
-        if let existing = keychain.string("deviceID") {
+        if let existing = keychain.string("deviceID") ?? UserDefaults(suiteName: appGroup)?.string(forKey: "deviceID.fallback") {
             deviceID = existing
         } else {
             deviceID = UUID().uuidString
-            keychain.set(deviceID, for: "deviceID")
+            if !keychain.set(deviceID, for: "deviceID") {
+                UserDefaults(suiteName: appGroup)?.set(deviceID, forKey: "deviceID.fallback")
+            }
         }
         let idiom: DevicePlatform = UIDevice.current.userInterfaceIdiom == .pad ? .iPad : .iPhone
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0"
@@ -60,11 +62,23 @@ enum SharedStore {
     // MARK: Paired Macs
 
     static var pairedMacs: [PairedMac] {
-        keychain.codable([PairedMac].self, "pairedMacs") ?? []
+        if let macs = keychain.codable([PairedMac].self, "pairedMacs") { return macs }
+        #if targetEnvironment(simulator)
+        // Unsigned simulator builds have no keychain; development only.
+        if let data = UserDefaults.standard.data(forKey: "sim.pairedMacs") {
+            return (try? JSONDecoder().decode([PairedMac].self, from: data)) ?? []
+        }
+        #endif
+        return []
     }
 
     static func savePairedMacs(_ macs: [PairedMac]) {
-        keychain.setCodable(macs, for: "pairedMacs")
+        let stored = keychain.setCodable(macs, for: "pairedMacs")
+        #if targetEnvironment(simulator)
+        if !stored { UserDefaults.standard.set(try? JSONEncoder().encode(macs), forKey: "sim.pairedMacs") }
+        #else
+        _ = stored
+        #endif
     }
 
     static func upsert(_ mac: PairedMac) {

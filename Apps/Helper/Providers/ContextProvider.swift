@@ -143,7 +143,7 @@ final class ContextProvider {
     // MARK: Browser URL
 
     private func refreshURL() {
-        guard clientsConnected, Hub.shared.integrations.browserURLTracking, let flavor = Self.browsers[current.bundleID] else { return }
+        guard clientsConnected, !MacInfo.isTestRun, Hub.shared.integrations.browserURLTracking, let flavor = Self.browsers[current.bundleID] else { return }
         let bundleID = current.bundleID
         let source = flavor == "safari"
             ? "with timeout of 2 seconds\ntell application id \"\(bundleID)\" to if (count of windows) > 0 then return URL of current tab of front window\nend timeout"

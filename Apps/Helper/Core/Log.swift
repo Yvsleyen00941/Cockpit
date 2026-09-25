@@ -48,6 +48,10 @@ final class LogStore {
 
     nonisolated static func append(_ level: Entry.Level, _ message: String) {
         let date = Date()
+        if ProcessInfo.processInfo.environment["CC_E2E"] != nil {
+            print("[\(level.rawValue)] \(message)")
+            fflush(stdout)
+        }
         Task { @MainActor in
             shared.entries.append(Entry(date: date, level: level, message: message))
             if shared.entries.count > 400 { shared.entries.removeFirst(shared.entries.count - 400) }

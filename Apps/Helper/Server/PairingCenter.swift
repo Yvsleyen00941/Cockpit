@@ -53,9 +53,12 @@ final class PairingCenter: PairingPresenter {
         current = request
         lastOutcome = nil
         Log.shared.info("Pairing request from \(request.deviceName) — code \(request.code)")
-        openPanel()
-        NSSound(named: "Glass")?.play()
-        notify(request)
+        // Test runs print the code instead of putting a HUD and a chime on your screen.
+        if !MacInfo.isTestRun {
+            openPanel()
+            NSSound(named: "Glass")?.play()
+            notify(request)
+        }
         if ProcessInfo.processInfo.environment["CC_PRINT_PAIRING_CODE"] != nil {
             print("CC_PAIRING_CODE=\(request.code)")
             fflush(stdout)
@@ -67,7 +70,7 @@ final class PairingCenter: PairingPresenter {
         current = nil
         if success {
             Log.shared.info("Paired with \(deviceName)")
-            NSSound(named: "Hero")?.play()
+            if !MacInfo.isTestRun { NSSound(named: "Hero")?.play() }
             Task { @MainActor in
                 try? await Task.sleep(for: .seconds(2.2))
                 self.closePanel()

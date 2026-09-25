@@ -7,8 +7,19 @@ import SystemConfiguration
 
 /// This Mac's stable identity on the protocol.
 enum MacInfo {
+    /// Set `CC_E2E=1` for automated tests: no permission prompts, no login item.
+    static let isTestRun = ProcessInfo.processInfo.environment["CC_E2E"] != nil
+
+    /// Only a copy in /Applications registers itself to launch at login.
+    static var isInstalled: Bool { Bundle.main.bundlePath.hasPrefix("/Applications/") }
+
+    /// `CC_INSTANCE=test` runs a fully separate hub (own identity, secrets
+    /// file, data folder, random port, no local API/USB) next to your real one.
+    static let instance: String? = ProcessInfo.processInfo.environment["CC_INSTANCE"]
+    static var suffix: String { instance.map { ".\($0)" } ?? "" }
+
     static var macID: String {
-        let key = "macID"
+        let key = "macID" + suffix
         if let existing = UserDefaults.standard.string(forKey: key) { return existing }
         let id = UUID().uuidString
         UserDefaults.standard.set(id, forKey: key)
@@ -16,7 +27,8 @@ enum MacInfo {
     }
 
     static var computerName: String {
-        (SCDynamicStoreCopyComputerName(nil, nil) as String?) ?? Host.current().localizedName ?? "Mac"
+        let name = (SCDynamicStoreCopyComputerName(nil, nil) as String?) ?? Host.current().localizedName ?? "Mac"
+        return instance.map { "\(name) (\($0.capitalized))" } ?? name
     }
 
     /// `Yorbens-MacBook-Pro` → used as `Yorbens-MacBook-Pro.local`.
@@ -69,8 +81,8 @@ enum MacInfo {
 
 /// Paired devices, one Keychain item each, cached in memory.
 actor DeviceStore: DeviceRegistry {
-    private let keychain = Keychain(service: "be.yorben.controlcenter.helper.devices")
-    private let indexKey = "pairedDeviceIDs"
+    private let keychain = SecretStore(service: "be.yorben.controlcenter.helper.devices")
+    private let indexKey = "pairedDeviceIDs" + MacInfo.suffix
     private var cache: [String: PairedDevice] = [:]
     private var loaded = false
 

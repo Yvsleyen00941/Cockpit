@@ -26,10 +26,12 @@ struct ControlCenterHelperApp: App {
 final class HelperAppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         UNUserNotificationCenter.current().delegate = self
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
+        if !MacInfo.isTestRun {
+            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
+        }
         MainActor.assumeIsolated {
             Hub.shared.start()
-            if !UserDefaults.standard.bool(forKey: "didOnboard") {
+            if MacInfo.isInstalled, !MacInfo.isTestRun, !UserDefaults.standard.bool(forKey: "didOnboard") {
                 UserDefaults.standard.set(true, forKey: "didOnboard")
                 LoginItem.set(true)
             }
@@ -62,22 +64,53 @@ enum PreferencesOpener {
     }
 }
 
+/// The menu bar item. The countdown comes from `MenuBarTicker` as a plain
+/// string, never from `Text(timerInterval:)` with a moving lower bound — in a
+/// MenuBarExtra label that re-renders in a tight loop and starves the main
+/// actor (and with it every connection).
 struct MenuBarLabel: View {
     @State private var hub = Hub.shared
+    @State private var ticker = MenuBarTicker.shared
 
     var body: some View {
         let connected = hub.hasClients
         let pairing = hub.pairing.current != nil
         HStack(spacing: 4) {
             Image(nsImage: MenuBarGlyph.image(connected: connected, pairing: pairing))
-            if let timer = hub.state.timers?.primary {
-                if timer.state == .running, let end = timer.endsAt {
-                    Text(timerInterval: Date.now...max(Date.now, end), countsDown: true)
-                        .monospacedDigit()
-                } else {
-                    Text(Fmt.countdown(timer.remaining(at: .now)))
-                        .monospacedDigit()
-                }
+            if let text = ticker.text {
+                Text(text).monospacedDigit()
+            }
+        }
+    }
+}
+
+/// Publishes the running timer as text once per second, only while one runs.
+@MainActor
+@Observable
+final class MenuBarTicker {
+    static let shared = MenuBarTicker()
+
+    private(set) var text: String?
+    private var task: Task<Void, Never>?
+
+    func update(_ timers: TimersState?) {
+        task?.cancel()
+        task = nil
+        guard let timer = timers?.primary else {
+            text = nil
+            return
+        }
+        guard timer.state == .running else {
+            text = Fmt.countdown(timer.remaining(at: .now))
+            return
+        }
+        task = Task { @MainActor [weak self] in
+            while !Task.isCancelled {
+                let remaining = timer.remaining(at: .now)
+                let next = Fmt.countdown(remaining)
+                if self?.text != next { self?.text = next }
+                if remaining <= 0 { break }
+                try? await Task.sleep(for: .seconds(1))
             }
         }
     }
