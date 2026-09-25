@@ -1,0 +1,15 @@
+# Xcode
+build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.xcscmblueprint
+.swiftpm/
+Packages/*/.build/
+Packages/*/.swiftpm/
+# macOS
+.DS_Store
+# Local signing overrides
+Config/Local.xcconfig
+# Screenshots scratch
+Tools/screens/
