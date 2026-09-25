@@ -18,7 +18,7 @@ public enum Mode {
 
 public struct ContextInput: Sendable {
     public var context: ActiveContext?
-    public var focus: FocusState?
+    public var focus: FocusInfo?
     public var calendar: CalendarState?
     public var daily: DailyState?
     public var timers: TimersState?
@@ -26,7 +26,7 @@ public struct ContextInput: Sendable {
     public var now: Date
     public var cal: Calendar
 
-    public init(context: ActiveContext?, focus: FocusState?, calendar: CalendarState?, daily: DailyState?, timers: TimersState?, audio: AudioState?, now: Date = .now, cal: Calendar = .current) {
+    public init(context: ActiveContext?, focus: FocusInfo?, calendar: CalendarState?, daily: DailyState?, timers: TimersState?, audio: AudioState?, now: Date = .now, cal: Calendar = .current) {
         self.context = context
         self.focus = focus
         self.calendar = calendar

@@ -55,11 +55,11 @@ final class FocusProvider: PollingProvider {
 
     var canTurnOff: Bool { shortcutNames.contains(Self.offName) }
 
-    private func read() -> FocusState {
+    private func read() -> FocusInfo {
         if let system = readSystem() {
-            return FocusState(known: true, active: system.active, name: system.name, available: available, canTurnOff: canTurnOff)
+            return FocusInfo(known: true, active: system.active, name: system.name, available: available, canTurnOff: canTurnOff)
         }
-        return FocusState(known: false, active: lastSet?.active ?? false, name: lastSet?.name, available: available, canTurnOff: canTurnOff)
+        return FocusInfo(known: false, active: lastSet?.active ?? false, name: lastSet?.name, available: available, canTurnOff: canTurnOff)
     }
 
     private func readSystem() -> (active: Bool, name: String?)? {

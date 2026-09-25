@@ -6,6 +6,8 @@
 	<array>
 		<string>be.yorben.controlcenter.refresh</string>
 	</array>
+	<key>CCAppIdentifierPrefix</key>
+	<string>$(AppIdentifierPrefix)</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

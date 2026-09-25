@@ -309,7 +309,7 @@ public enum DemoData {
 
     public static let audio = AudioState(outputVolume: 0.42, outputMuted: false, outputDevice: "MacBook Pro Speakers", inputMuted: false, inputVolume: 0.8, inputDevice: "MacBook Pro Microphone", micInUse: false)
 
-    public static let focusOff = FocusState(known: true, active: false, name: nil, available: ["Deep Work", "Study", "Do Not Disturb"], canTurnOff: true)
+    public static let focusOff = FocusInfo(known: true, active: false, name: nil, available: ["Deep Work", "Study", "Do Not Disturb"], canTurnOff: true)
 
     public static func daily(now: Date) -> DailyState {
         let f = DateFormatter()

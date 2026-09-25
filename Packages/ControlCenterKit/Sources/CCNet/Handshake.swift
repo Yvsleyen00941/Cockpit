@@ -108,6 +108,16 @@ public struct AuthOutcome: Sendable {
 public enum ClientHandshake {
     /// Authenticates to a paired Mac and switches the channel to encryption.
     public static func authenticate(channel: MessageChannel, device: DeviceIdentity, mac: PairedMac, transport: LinkTransport, timeout: TimeInterval = 8) async throws -> AuthOutcome {
+        let expected = mac
+        let (outcome, _) = try await authenticate(channel: channel, device: device, transport: transport, timeout: timeout) { macID in
+            macID == expected.macID ? expected : nil
+        }
+        return outcome
+    }
+
+    /// Authenticates to whichever paired Mac answers — used over USB, where
+    /// the Mac dials in and only the challenge says who it is.
+    public static func authenticate(channel: MessageChannel, device: DeviceIdentity, transport: LinkTransport, timeout: TimeInterval = 8, resolve: @Sendable (_ macID: String) -> PairedMac?) async throws -> (AuthOutcome, PairedMac) {
         let initiatorNonce = CCRandom.bytes(32)
         try await channel.send(.hello(Hello(deviceID: device.deviceID, deviceName: device.deviceName, platform: device.platform, appVersion: device.appVersion, nonce: initiatorNonce, transport: transport)))
 
@@ -117,7 +127,7 @@ public enum ClientHandshake {
             throw HandshakeError.authenticationFailed(result.reason ?? "rejected")
         }
         guard case .challenge(let challenge) = first.body else { throw HandshakeError.unexpected(first.type.rawValue) }
-        guard challenge.macID == mac.macID else { throw HandshakeError.wrongMac }
+        guard let mac = resolve(challenge.macID) else { throw HandshakeError.wrongMac }
         guard challenge.known else { throw HandshakeError.unknownDevice }
 
         let ltk = SymmetricKey(data: mac.ltk)
@@ -133,7 +143,7 @@ public enum ClientHandshake {
 
         let keys = SessionCrypto.sessionKeys(ltk: ltk, initiatorNonce: initiatorNonce, responderNonce: challenge.nonce)
         await channel.enableEncryption(sendKey: keys.initiatorToResponder, sendRole: .initiator, receiveKey: keys.responderToInitiator, receiveRole: .responder)
-        return AuthOutcome(macName: challenge.macName, helperVersion: result.helperVersion)
+        return (AuthOutcome(macName: challenge.macName, helperVersion: result.helperVersion), mac)
     }
 
     /// Pairs with a Mac. `enterCode` is called when the Mac is showing its

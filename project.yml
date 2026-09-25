@@ -45,6 +45,7 @@ targets:
       path: Config/iOS/Info.plist
       properties:
         CFBundleDisplayName: Control Center
+        CCAppIdentifierPrefix: $(AppIdentifierPrefix)
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSRequiresIPhoneOS: true
@@ -113,6 +114,7 @@ targets:
       path: Config/Widgets/Info.plist
       properties:
         CFBundleDisplayName: Control Center Widgets
+        CCAppIdentifierPrefix: $(AppIdentifierPrefix)
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         NSExtension:

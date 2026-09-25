@@ -283,7 +283,7 @@ public struct CalendarState: Codable, Hashable, Sendable {
     }
 }
 
-public struct FocusState: Codable, Hashable, Sendable {
+public struct FocusInfo: Codable, Hashable, Sendable {
     /// The Mac could read the Focus state (needs Full Disk Access).
     public var known: Bool
     public var active: Bool
@@ -938,7 +938,7 @@ public enum ChannelValue: Hashable, Sendable {
     case media(MediaState)
     case audio(AudioState)
     case calendar(CalendarState)
-    case focus(FocusState)
+    case focus(FocusInfo)
     case bot(BotState)
     case botSeries(PnLSeries)
     case botEvents(BotEventLog)
@@ -986,7 +986,7 @@ extension ChannelValue: Codable {
         case .media: self = .media(try c.decode(MediaState.self, forKey: .v))
         case .audio: self = .audio(try c.decode(AudioState.self, forKey: .v))
         case .calendar: self = .calendar(try c.decode(CalendarState.self, forKey: .v))
-        case .focus: self = .focus(try c.decode(FocusState.self, forKey: .v))
+        case .focus: self = .focus(try c.decode(FocusInfo.self, forKey: .v))
         case .bot: self = .bot(try c.decode(BotState.self, forKey: .v))
         case .botSeries: self = .botSeries(try c.decode(PnLSeries.self, forKey: .v))
         case .botEvents: self = .botEvents(try c.decode(BotEventLog.self, forKey: .v))
@@ -1035,7 +1035,7 @@ public struct LiveState: Codable, Hashable, Sendable {
     public var media: MediaState?
     public var audio: AudioState?
     public var calendar: CalendarState?
-    public var focus: FocusState?
+    public var focus: FocusInfo?
     public var bot: BotState?
     public var botSeries: PnLSeries?
     public var botEvents: BotEventLog?

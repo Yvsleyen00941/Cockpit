@@ -205,7 +205,7 @@ struct ContextEngineTests {
         return Calendar(identifier: .gregorian).date(from: components)!
     }()
 
-    func input(_ bundleID: String, url: String? = nil, daily: DailyState? = nil, focus: FocusState? = nil, calendar: CalendarState? = nil, audio: AudioState? = nil, at date: Date? = nil) -> ContextInput {
+    func input(_ bundleID: String, url: String? = nil, daily: DailyState? = nil, focus: FocusInfo? = nil, calendar: CalendarState? = nil, audio: AudioState? = nil, at date: Date? = nil) -> ContextInput {
         ContextInput(context: ActiveContext(bundleID: bundleID, appName: bundleID, url: url), focus: focus, calendar: calendar, daily: daily, timers: nil, audio: audio, now: date ?? noon, cal: Calendar(identifier: .gregorian))
     }
 
