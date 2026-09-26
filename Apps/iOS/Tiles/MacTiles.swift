@@ -3,40 +3,42 @@ import SwiftUI
 
 // MARK: - System (home quadrant)
 
-/// CPU and RAM bars, now playing with skip/pause, and a mic mute toggle.
+/// CPU and memory as big light readouts, now playing, and the mic.
 struct SystemSummaryTile: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
         let system = model.store.system
         GeometryReader { proxy in
-            let roomy = proxy.size.height > 280
-            VStack(alignment: .leading, spacing: roomy ? 13 : 9) {
+            let roomy = proxy.size.height > 268
+            VStack(alignment: .leading, spacing: roomy ? 14 : 11) {
                 CardHeader(title: system?.model ?? "Mac", symbol: "laptopcomputer") {
                     HStack(spacing: 6) {
                         if let thermal = system?.thermal, thermal != .nominal {
-                            Pill(text: thermal.rawValue, color: thermal == .fair ? CC.yellow : CC.red, symbol: "thermometer.medium")
+                            Pill(text: thermal.rawValue.capitalized, color: thermal == .fair ? CC.yellow : CC.red, symbol: "thermometer.medium")
                         }
                         if let battery = system?.battery {
                             Pill(text: "\(Int(battery.level * 100))%", color: battery.level < 0.2 && !battery.onAC ? CC.red : CC.text2, symbol: battery.isCharging ? "bolt.fill" : "battery.75percent")
                         }
                     }
                 }
-                meter("CPU", value: system?.cpu ?? 0, detail: "\(Int(((system?.cpu ?? 0) * 100).rounded()))%")
+                HStack(alignment: .top, spacing: 22) {
+                    readout("CPU", value: "\(Int(((system?.cpu ?? 0) * 100).rounded()))", unit: "%", fraction: system?.cpu ?? 0, color: CC.load(system?.cpu ?? 0))
+                    readout("Memory", value: system.map { Fmt.gigabytes($0.memUsed) } ?? "—", unit: system.map { "/ \(Fmt.gigabytes($0.memTotal)) GB" } ?? "", fraction: system?.memFraction ?? 0, color: pressureColor(system?.memPressure))
+                }
                 if roomy, let system {
                     CoreBars(cores: system.cpuCores, efficiency: system.efficiencyCores)
-                        .frame(height: 22)
+                        .frame(height: 26)
                 }
-                meter("Memory", value: system?.memFraction ?? 0, detail: system.map { "\(Fmt.gigabytes($0.memUsed)) / \(Fmt.gigabytes($0.memTotal)) GB" } ?? "—", color: pressureColor(system?.memPressure))
-                Divider().overlay(CC.divider)
+                Rectangle().fill(CC.divider).frame(height: 1)
                 if let track = model.store.media?.nowPlaying {
-                    NowPlayingRow(track: track, artwork: roomy ? 54 : 44)
+                    NowPlayingRow(track: track, artwork: roomy ? 54 : 46)
                 } else {
                     HStack(spacing: 10) {
                         Image(systemName: "music.note").foregroundStyle(CC.text3)
-                        Text("Nothing playing").font(.system(size: 14)).foregroundStyle(CC.text2)
+                        Text("Nothing playing").font(.system(size: 15)).foregroundStyle(CC.text2)
                     }
-                    .frame(height: roomy ? 54 : 44)
+                    .frame(height: roomy ? 54 : 46)
                 }
                 Spacer(minLength: 0)
                 MicRow()
@@ -47,18 +49,23 @@ struct SystemSummaryTile: View {
         .onTapGesture(count: 2) { model.show(page: "mac") }
     }
 
-    private func meter(_ label: String, value: Double, detail: String, color: Color? = nil) -> some View {
+    private func readout(_ label: String, value: String, unit: String, fraction: Double, color: Color) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                SectionLabel(label)
-                Spacer()
-                Text(detail)
-                    .font(.system(size: 13, weight: .semibold).monospacedDigit())
+            SectionLabel(label)
+            HStack(alignment: .firstTextBaseline, spacing: 4) {
+                Text(value)
+                    .font(CCFont.display(34))
                     .foregroundStyle(CC.text)
                     .contentTransition(.numericText())
+                Text(unit)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(CC.text2)
             }
-            BarGauge(value: value, color: color ?? CC.load(value), height: 8)
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+            BarGauge(value: fraction, color: color, height: 6)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func pressureColor(_ pressure: MemoryPressure?) -> Color {
@@ -77,13 +84,15 @@ struct MicRow: View {
         let audio = model.store.audio
         let muted = audio?.inputMuted ?? false
         let live = (audio?.micInUse ?? false) && !muted
-        HStack(spacing: 10) {
+        let tint = muted ? CC.red : (live ? CC.green : CC.accent)
+        HStack(spacing: 11) {
             Image(systemName: muted ? "mic.slash.fill" : "mic.fill")
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundStyle(muted ? CC.red : (live ? CC.green : CC.text2))
-                .frame(width: 22)
-            Text("Microphone")
-                .font(.system(size: 14, weight: .medium))
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(muted ? CC.red : (live ? CC.green : CC.icon))
+                .frame(width: 32, height: 32)
+                .background(Circle().fill(tint.opacity(muted || live ? 0.18 : 0.08)))
+            Text(muted ? "Microphone muted" : "Microphone")
+                .font(.system(size: 15, weight: .medium))
                 .foregroundStyle(CC.text)
             if live { Pill(text: "Live", color: CC.green, dot: true) }
             Spacer()
@@ -100,15 +109,16 @@ struct NowPlayingRow: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 13) {
             Artwork(track: track, size: artwork)
+                .glow(CC.accent, spread: 10, opacity: 0.35, y: 4)
             VStack(alignment: .leading, spacing: 5) {
                 Text(track.title)
-                    .font(.system(size: 15, weight: .semibold))
+                    .font(.system(size: 15.5, weight: .semibold))
                     .foregroundStyle(CC.text)
                     .lineLimit(1)
                 Text(track.artist)
-                    .font(.system(size: 12))
+                    .font(.system(size: 13))
                     .foregroundStyle(CC.text2)
                     .lineLimit(1)
                 TimelineView(.periodic(from: .now, by: 1)) { context in
@@ -116,9 +126,9 @@ struct NowPlayingRow: View {
                 }
             }
             HStack(spacing: 4) {
-                control("backward.fill", .previous, size: 14)
-                control(track.isPlaying ? "pause.fill" : "play.fill", .playPause, size: 20, prominent: true)
-                control("forward.fill", .next, size: 14)
+                control("backward.fill", .previous, size: 13)
+                control(track.isPlaying ? "pause.fill" : "play.fill", .playPause, size: 19, prominent: true)
+                control("forward.fill", .next, size: 13)
             }
         }
     }
@@ -131,8 +141,12 @@ struct NowPlayingRow: View {
             Image(systemName: symbol)
                 .font(.system(size: size, weight: .bold))
                 .foregroundStyle(prominent ? CC.text : CC.text2)
-                .frame(width: prominent ? 44 : 34, height: 44)
-                .background(Circle().fill(prominent ? CC.elevated : .clear))
+                .frame(width: prominent ? 46 : 34, height: 46)
+                .background {
+                    if prominent {
+                        Circle().fill(CC.elevated).overlay(Circle().strokeBorder(CC.divider, lineWidth: 1))
+                    }
+                }
         }
         .buttonStyle(PressStyle(scale: 0.9))
     }
@@ -140,77 +154,115 @@ struct NowPlayingRow: View {
 
 // MARK: - Mac monitor
 
+/// A vertical glass pill that fills from the bottom — the fleet dashboard's
+/// battery gauge.
+struct PillGauge: View {
+    var value: Double
+    var color: Color
+    var label: String
+    var detail: String
+    @Environment(\.colorScheme) private var scheme
+
+    var body: some View {
+        VStack(spacing: 8) {
+            GeometryReader { proxy in
+                let fraction = min(1, max(0, value))
+                ZStack(alignment: .bottom) {
+                    Capsule().fill(CC.track)
+                    Capsule()
+                        .fill(LinearGradient(colors: [color, color.opacity(0.55)], startPoint: .top, endPoint: .bottom))
+                        .frame(height: max(proxy.size.width, proxy.size.height * fraction))
+                    Text("\(Int((fraction * 100).rounded()))%")
+                        .font(.system(size: 13, weight: .semibold).monospacedDigit())
+                        .foregroundStyle(fraction > 0.18 ? color.legibleText(in: scheme) : CC.text)
+                        .padding(.bottom, 10)
+                }
+                .overlay(Capsule().strokeBorder(CC.divider, lineWidth: 1))
+            }
+            .frame(width: 54)
+            .animation(.spring(response: 0.6, dampingFraction: 0.85), value: value)
+            VStack(spacing: 1) {
+                Text(label)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(CC.text)
+                if !detail.isEmpty {
+                    Text(detail)
+                        .font(.system(size: 11.5).monospacedDigit())
+                        .foregroundStyle(CC.text2)
+                        .lineLimit(1)
+                }
+            }
+        }
+    }
+}
+
 struct SystemDetailTile: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
         let system = model.store.system
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 14) {
             CardHeader(title: system?.model ?? "Mac", symbol: "gauge.with.dots.needle.67percent") {
                 if let uptime = system?.uptime {
                     Text("Up \(Fmt.duration(uptime))")
-                        .font(.system(size: 11, weight: .medium))
+                        .font(.system(size: 13, weight: .medium))
                         .foregroundStyle(CC.text3)
                 }
             }
-            HStack(alignment: .top, spacing: 24) {
-                VStack(alignment: .leading, spacing: 6) {
-                    SectionLabel("CPU")
-                    Text("\(Int(((system?.cpu ?? 0) * 100).rounded()))%")
-                        .font(CCFont.display(56))
-                        .foregroundStyle(CC.load(system?.cpu ?? 0))
-                        .contentTransition(.numericText())
-                    Sparkline(values: model.store.cpuHistory, color: CC.accent)
-                        .frame(height: 60)
-                }
-                .frame(maxWidth: .infinity)
+            HStack(alignment: .top, spacing: 26) {
                 VStack(alignment: .leading, spacing: 8) {
+                    SectionLabel("CPU")
+                    HStack(alignment: .firstTextBaseline, spacing: 4) {
+                        Text("\(Int(((system?.cpu ?? 0) * 100).rounded()))")
+                            .font(CCFont.display(64))
+                            .tracking(-1.5)
+                            .foregroundStyle(CC.text)
+                            .contentTransition(.numericText())
+                        Text("%")
+                            .font(.system(size: 22, weight: .light))
+                            .foregroundStyle(CC.load(system?.cpu ?? 0))
+                    }
+                    Sparkline(values: model.store.cpuHistory, color: CC.accent)
+                        .frame(height: 56)
                     if let system {
-                        HStack {
-                            SectionLabel("\(system.efficiencyCores)E")
-                            Spacer()
-                            SectionLabel("\(system.cpuCores.count - system.efficiencyCores)P")
-                        }
                         CoreBars(cores: system.cpuCores, efficiency: system.efficiencyCores)
-                            .frame(height: 94)
+                            .frame(height: 44)
+                        HStack {
+                            SectionLabel("\(system.efficiencyCores) efficiency")
+                            Spacer()
+                            SectionLabel("\(system.cpuCores.count - system.efficiencyCores) performance")
+                        }
                     }
                 }
                 .frame(maxWidth: .infinity)
-            }
-            HStack(spacing: 16) {
-                gauge("GPU", system?.gpu ?? 0, "\(Int(((system?.gpu ?? 0) * 100).rounded()))%")
-                gauge("Memory", system?.memFraction ?? 0, system.map { "\(Fmt.gigabytes($0.memUsed)) GB" } ?? "—")
-                gauge("Disk", system.map { 1 - Double($0.diskFree) / Double(max(1, $0.diskTotal)) } ?? 0, system.map { "\(Fmt.bytes($0.diskFree)) free" } ?? "—")
-            }
-            Divider().overlay(CC.divider)
-            HStack(spacing: 22) {
-                Stat(label: "Down", value: Fmt.rate(system?.netIn ?? 0), size: 18)
-                Stat(label: "Up", value: Fmt.rate(system?.netOut ?? 0), size: 18)
-                Stat(label: "Swap", value: system.map { Fmt.bytes($0.swapUsed) } ?? "—", size: 18)
-                Stat(label: "Pressure", value: system?.memPressure.rawValue.capitalized ?? "—", color: system?.memPressure == .normal ? CC.text : CC.orange, size: 18)
-                if let battery = system?.battery {
-                    Stat(label: battery.isCharging ? "Charging" : "Battery", value: "\(Int(battery.level * 100))%", color: battery.level < 0.2 ? CC.red : CC.text, size: 18)
+                HStack(spacing: 18) {
+                    PillGauge(value: system?.gpu ?? 0, color: CC.load(system?.gpu ?? 0), label: "GPU", detail: "")
+                    PillGauge(value: system?.memFraction ?? 0, color: memoryColor(system?.memPressure), label: "Memory", detail: system.map { "\(Fmt.gigabytes($0.memUsed)) GB" } ?? "—")
+                    PillGauge(value: system.map { 1 - Double($0.diskFree) / Double(max(1, $0.diskTotal)) } ?? 0, color: CC.teal, label: "Disk", detail: system.map { "\(Fmt.bytes($0.diskFree)) free" } ?? "—")
                 }
-                Stat(label: "Thermal", value: system?.thermal.rawValue.capitalized ?? "—", color: system?.thermal == .nominal ? CC.green : CC.orange, size: 18)
+                .frame(maxHeight: .infinity)
             }
-            Spacer(minLength: 0)
+            Rectangle().fill(CC.divider).frame(height: 1)
+            HStack(spacing: 24) {
+                Stat(label: "Down", value: Fmt.rate(system?.netIn ?? 0), size: 19)
+                Stat(label: "Up", value: Fmt.rate(system?.netOut ?? 0), size: 19)
+                Stat(label: "Swap", value: system.map { Fmt.bytes($0.swapUsed) } ?? "—", size: 19)
+                Stat(label: "Pressure", value: system?.memPressure.rawValue.capitalized ?? "—", color: system?.memPressure == .normal ? CC.text : CC.orange, size: 19)
+                if let battery = system?.battery {
+                    Stat(label: battery.isCharging ? "Charging" : "Battery", value: "\(Int(battery.level * 100))%", color: battery.level < 0.2 ? CC.red : CC.text, size: 19)
+                }
+                Stat(label: "Thermal", value: system?.thermal.rawValue.capitalized ?? "—", color: system?.thermal == .nominal ? CC.green : CC.orange, size: 19)
+            }
         }
         .card()
     }
 
-    private func gauge(_ label: String, _ value: Double, _ detail: String) -> some View {
-        VStack(alignment: .leading, spacing: 7) {
-            HStack {
-                SectionLabel(label)
-                Spacer()
-                Text(detail)
-                    .font(.system(size: 12, weight: .semibold).monospacedDigit())
-                    .foregroundStyle(CC.text)
-                    .lineLimit(1)
-            }
-            BarGauge(value: value, color: CC.load(value), height: 7)
+    private func memoryColor(_ pressure: MemoryPressure?) -> Color {
+        switch pressure {
+        case .warning: CC.yellow
+        case .critical: CC.red
+        default: CC.accent
         }
-        .frame(maxWidth: .infinity)
     }
 }
 
@@ -219,23 +271,23 @@ struct ProcessesTile: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            CardHeader(title: "Top Processes", symbol: "list.number")
+            CardHeader(title: "Top processes", symbol: "list.number")
             let processes = model.store.system?.topProcesses ?? []
             if processes.isEmpty {
-                Text("Idle.").font(.system(size: 14)).foregroundStyle(CC.text2).frame(maxWidth: .infinity, maxHeight: .infinity)
+                Text("Idle.").font(.system(size: 15)).foregroundStyle(CC.text2).frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             ForEach(processes) { process in
-                HStack(spacing: 10) {
-                    AppIconView(bundleID: process.bundleID, size: 26, fallback: "gearshape")
-                    VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 12) {
+                    AppIconView(bundleID: process.bundleID, size: 30, fallback: "gearshape")
+                    VStack(alignment: .leading, spacing: 5) {
                         HStack {
                             Text(process.name)
-                                .font(.system(size: 14, weight: .medium))
+                                .font(.system(size: 14.5, weight: .medium))
                                 .foregroundStyle(CC.text)
                                 .lineLimit(1)
                             Spacer()
                             Text("\(Int((process.cpu * 100).rounded()))%")
-                                .font(.system(size: 13, weight: .semibold).monospacedDigit())
+                                .font(.system(size: 14, weight: .regular).monospacedDigit())
                                 .foregroundStyle(CC.load(min(1, process.cpu)))
                         }
                         BarGauge(value: min(1, process.cpu), color: CC.load(min(1, process.cpu)), height: 4)
@@ -263,33 +315,31 @@ struct AppSwitcherTile: View {
     var body: some View {
         let apps = model.store.apps?.apps ?? []
         VStack(alignment: .leading, spacing: 12) {
-            CardHeader(title: "Running Apps", symbol: "square.grid.3x2") {
-                Text("\(apps.count)").font(.system(size: 12, weight: .semibold).monospacedDigit()).foregroundStyle(CC.text3)
+            CardHeader(title: "Running apps", symbol: "square.grid.3x2") {
+                Text("\(apps.count)").font(.system(size: 13, weight: .medium).monospacedDigit()).foregroundStyle(CC.text3)
             }
             ScrollView(showsIndicators: false) {
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 84), spacing: 8)], spacing: 10) {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 84), spacing: 8)], spacing: 12) {
                     ForEach(apps) { app in
                         Button {
                             Feedback.tap()
                             model.send(.app(AppControl(.activate, bundleID: app.bundleID)))
                         } label: {
-                            VStack(spacing: 7) {
-                                AppIconView(bundleID: app.bundleID, size: 56)
+                            VStack(spacing: 8) {
+                                AppIconView(bundleID: app.bundleID, size: 54)
                                     .opacity(app.isHidden ? 0.5 : 1)
-                                    .overlay(alignment: .bottom) {
-                                        if app.isActive {
-                                            Circle().fill(CC.accent).frame(width: 5, height: 5).offset(y: 9)
-                                        }
-                                    }
+                                    .glow(app.isActive ? CC.accent : .clear, spread: 12, opacity: 0.55, y: 0)
                                 Text(app.name)
-                                    .font(.system(size: 11, weight: .medium))
+                                    .font(.system(size: 11.5, weight: .medium))
                                     .foregroundStyle(app.isActive ? CC.text : CC.text2)
                                     .lineLimit(1)
-                                    .frame(width: 72)
-                                    .padding(.top, 4)
+                                    .frame(width: 74)
                             }
-                            .padding(6)
-                            .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(app.isActive ? CC.accent.opacity(0.14) : .clear))
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 4)
+                            .background {
+                                if app.isActive { Well(radius: 18, tint: CC.accent) }
+                            }
                         }
                         .buttonStyle(PressStyle())
                         .contextMenu {
@@ -314,23 +364,23 @@ struct AppContextTile: View {
     var body: some View {
         let context = model.store.context
         VStack(alignment: .leading, spacing: 14) {
-            CardHeader(title: context?.url != nil ? "Current Page" : "Current Window", symbol: "macwindow")
-            HStack(alignment: .top, spacing: 14) {
-                AppIconView(bundleID: context?.bundleID, size: 46)
+            CardHeader(title: context?.url != nil ? "Current page" : "Current window", symbol: "macwindow")
+            HStack(alignment: .center, spacing: 16) {
+                AppIconView(bundleID: context?.bundleID, size: 54)
                 VStack(alignment: .leading, spacing: 5) {
                     Text(context?.windowTitle ?? context?.appName ?? "—")
-                        .font(.system(size: 19, weight: .semibold))
+                        .font(CCFont.title(21, weight: .medium))
                         .foregroundStyle(CC.text)
                         .lineLimit(2)
                     if let url = context?.url {
                         Text(url)
-                            .font(.system(size: 12, design: .monospaced))
+                            .font(.system(size: 12.5, design: .monospaced))
                             .foregroundStyle(CC.accent)
                             .lineLimit(1)
                             .truncationMode(.middle)
                     } else if let since = context?.since {
                         Text("In front for \(Fmt.duration(Date().timeIntervalSince(since)))")
-                            .font(.system(size: 12))
+                            .font(.system(size: 13))
                             .foregroundStyle(CC.text2)
                     }
                 }
@@ -341,12 +391,7 @@ struct AppContextTile: View {
                     actionButton("Copy URL", "doc.on.doc") { model.send(.clipboard(ClipboardCommand(.copyURL))) }
                     actionButton("Open on iPad", "ipad.landscape") { openURL(url) }
                     ShareLink(item: url) {
-                        Label("Share", systemImage: "square.and.arrow.up")
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(CC.accent)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 40)
-                            .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(CC.accent.opacity(0.12)))
+                        actionLabel("Share", "square.and.arrow.up")
                     }
                     actionButton("Reload", "arrow.clockwise") { model.send(.keyCombo(KeyCombo("cmd+r"))) }
                 }
@@ -360,14 +405,20 @@ struct AppContextTile: View {
             Feedback.tap()
             action()
         } label: {
-            Label(title, systemImage: symbol)
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(CC.accent)
-                .frame(maxWidth: .infinity)
-                .frame(height: 40)
-                .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(CC.accent.opacity(0.12)))
+            actionLabel(title, symbol)
         }
         .buttonStyle(PressStyle())
+    }
+
+    private func actionLabel(_ title: String, _ symbol: String) -> some View {
+        Label(title, systemImage: symbol)
+            .font(.system(size: 13.5, weight: .semibold))
+            .foregroundStyle(CC.accent)
+            .lineLimit(1)
+            .minimumScaleFactor(0.8)
+            .frame(maxWidth: .infinity)
+            .frame(height: 42)
+            .background(Well(radius: 21, tint: CC.accent))
     }
 }
 
@@ -378,50 +429,50 @@ struct GitTile: View {
 
     var body: some View {
         GeometryReader { proxy in
-        let compact = proxy.size.height < 210
-        VStack(alignment: .leading, spacing: compact ? 8 : 12) {
-            if !compact { CardHeader(title: "Repository", symbol: "arrow.triangle.branch") }
-            if let repo = model.store.git?.current {
-                HStack(spacing: 8) {
-                    Text(repo.name)
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundStyle(CC.text)
-                        .lineLimit(1)
-                    Pill(text: repo.branch, color: CC.accent, symbol: "arrow.triangle.branch")
+            let compact = proxy.size.height < 210
+            VStack(alignment: .leading, spacing: compact ? 8 : 12) {
+                if !compact { CardHeader(title: "Repository", symbol: "arrow.triangle.branch") }
+                if let repo = model.store.git?.current {
+                    HStack(spacing: 8) {
+                        Text(repo.name)
+                            .font(.system(size: 20, weight: .medium))
+                            .foregroundStyle(CC.text)
+                            .lineLimit(1)
+                        Pill(text: repo.branch, color: CC.accent, symbol: "arrow.triangle.branch")
+                        Spacer(minLength: 0)
+                        if repo.ahead > 0 { Pill(text: "↑\(repo.ahead)", color: CC.green) }
+                        if repo.behind > 0 { Pill(text: "↓\(repo.behind)", color: CC.orange) }
+                    }
+                    HStack(spacing: 22) {
+                        count("Staged", repo.staged, CC.green)
+                        count("Changed", repo.modified, CC.orange)
+                        count("New", repo.untracked, CC.accent)
+                        if repo.conflicts > 0 { count("Conflicts", repo.conflicts, CC.red) }
+                    }
+                    if let commit = repo.lastCommit, !compact {
+                        Text("\(commit)\(repo.lastCommitDate.map { " · \(Fmt.ago($0))" } ?? "")")
+                            .font(.system(size: 12.5, design: .monospaced))
+                            .foregroundStyle(CC.text2)
+                            .lineLimit(1)
+                    }
                     Spacer(minLength: 0)
-                    if repo.ahead > 0 { Pill(text: "↑\(repo.ahead)", color: CC.green) }
-                    if repo.behind > 0 { Pill(text: "↓\(repo.behind)", color: CC.orange) }
+                    HStack(spacing: 8) {
+                        gitButton("Pull", "arrow.down", .pull)
+                        gitButton("Push", "arrow.up", .push)
+                        gitButton("Commit…", "checkmark", .commitAll)
+                    }
+                } else {
+                    SetupPrompt(symbol: "arrow.triangle.branch", title: "No repository", message: "Open a project in Xcode, or add repositories in the helper's Git settings.")
                 }
-                HStack(spacing: 16) {
-                    count("Staged", repo.staged, CC.green)
-                    count("Changed", repo.modified, CC.orange)
-                    count("New", repo.untracked, CC.accent)
-                    if repo.conflicts > 0 { count("Conflicts", repo.conflicts, CC.red) }
-                }
-                if let commit = repo.lastCommit, !compact {
-                    Text("\(commit)\(repo.lastCommitDate.map { " · \(Fmt.ago($0))" } ?? "")")
-                        .font(.system(size: 12, design: .monospaced))
-                        .foregroundStyle(CC.text2)
-                        .lineLimit(1)
-                }
-                Spacer(minLength: 0)
-                HStack(spacing: 8) {
-                    gitButton("Pull", "arrow.down", .pull)
-                    gitButton("Push", "arrow.up", .push)
-                    gitButton("Commit…", "checkmark", .commitAll)
-                }
-            } else {
-                SetupPrompt(symbol: "arrow.triangle.branch", title: "No repository", message: "Open a project in Xcode, or add repositories in the helper's Git settings.")
             }
-        }
         }
         .card()
     }
 
     private func count(_ label: String, _ value: Int, _ color: Color) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: 0) {
             Text("\(value)")
-                .font(CCFont.number(22))
+                .font(CCFont.display(30))
                 .foregroundStyle(value > 0 ? color : CC.text3)
             SectionLabel(label)
         }
@@ -433,12 +484,32 @@ struct GitTile: View {
             model.tap(key, pageID: nil)
         } label: {
             Label(title, systemImage: symbol)
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(command == .commitAll ? Color(hex: 0x0A0A0F) : CC.accent)
-                .frame(maxWidth: .infinity)
-                .frame(height: 38)
-                .background(RoundedRectangle(cornerRadius: 11, style: .continuous).fill(command == .commitAll ? CC.green : CC.accent.opacity(0.13)))
         }
-        .buttonStyle(PressStyle())
+        .buttonStyle(GitButtonStyle(prominent: command == .commitAll))
+    }
+}
+
+private struct GitButtonStyle: ButtonStyle {
+    var prominent: Bool
+    @Environment(\.colorScheme) private var scheme
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: 14, weight: .semibold))
+            .foregroundStyle(prominent ? CC.green.legibleText(in: scheme) : CC.accent)
+            .frame(maxWidth: .infinity)
+            .frame(height: 40)
+            .background {
+                if prominent {
+                    Capsule()
+                        .fill(LinearGradient(colors: [CC.green.opacity(0.85), CC.green], startPoint: .top, endPoint: .bottom))
+                        .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                        .glow(CC.green, spread: 10, opacity: 0.35, y: 4)
+                } else {
+                    Well(radius: 20, tint: CC.accent)
+                }
+            }
+            .scaleEffect(configuration.isPressed ? 0.96 : 1)
+            .animation(.spring(response: 0.2, dampingFraction: 0.7), value: configuration.isPressed)
     }
 }

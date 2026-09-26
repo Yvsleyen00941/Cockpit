@@ -39,6 +39,10 @@ final class DemoHub: HubLink {
         state.context = ProcessInfo.processInfo.arguments.contains("-CCDemoHome")
             ? ActiveContext(bundleID: "com.apple.systempreferences", appName: "System Settings")
             : DemoData.context(now: now)
+        if ProcessInfo.processInfo.arguments.contains("-CCDemoLocked") {
+            // Screenshots and testing: the demo Mac is locked, so the iPad goes ambient.
+            state.context?.presence = .locked
+        }
         state.apps = DemoData.apps
         state.system = DemoData.system(now: now)
         state.media = DemoData.media(now: now)

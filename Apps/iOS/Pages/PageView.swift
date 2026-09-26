@@ -20,7 +20,7 @@ struct PageView: View {
                 ZStack(alignment: .topLeading) {
                     ForEach(page.tiles) { tile in
                         if let placement = byID[tile.id] {
-                            TileContainer(tile: tile, page: page)
+                            TileContainer(tile: tile, page: page, order: placement.row * columns + placement.col)
                                 .frame(width: grid.width(placement.cols), height: grid.height(placement.rows))
                                 .offset(x: grid.x(placement.col), y: grid.y(placement.row))
                         }
@@ -60,19 +60,28 @@ struct GridMetrics {
 struct TileContainer: View {
     let tile: Tile
     let page: Page
+    /// Reading order on the grid — tiles rise in one after another.
+    var order = 0
     @Environment(AppModel.self) private var model
     @State private var inspecting = false
     @State private var targeted = false
+    @State private var shown = false
 
     var body: some View {
         TileView(tile: tile, pageID: page.id)
+            .opacity(shown ? 1 : 0)
+            .offset(y: shown ? 0 : 18)
+            .scaleEffect(shown ? 1 : 0.985)
+            .onAppear {
+                withAnimation(.spring(response: 0.55, dampingFraction: 0.86).delay(0.03 + Double(min(order, 60)) * 0.004)) { shown = true }
+            }
             .allowsHitTesting(!model.editing || isKeys)
             .overlay {
                 if model.editing {
                     ZStack {
                         RoundedRectangle(cornerRadius: Metrics.radius, style: .continuous)
-                            .strokeBorder(style: StrokeStyle(lineWidth: targeted ? 2.5 : 1.5, dash: [6, 5]))
-                            .foregroundStyle(targeted ? CC.accent : CC.orange.opacity(0.8))
+                            .strokeBorder(style: StrokeStyle(lineWidth: targeted ? 2.5 : 1.5, dash: [7, 6]))
+                            .foregroundStyle(targeted ? CC.accent : CC.orange.opacity(0.85))
                         if !isKeys {
                             RoundedRectangle(cornerRadius: Metrics.radius, style: .continuous)
                                 .fill(Color.black.opacity(0.001))
@@ -93,16 +102,16 @@ struct TileContainer: View {
                             HStack {
                                 Spacer()
                                 Text("\(tile.cols) × \(tile.rows)")
-                                    .font(.system(size: 11, weight: .bold).monospacedDigit())
-                                    .foregroundStyle(CC.text2)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(Capsule().fill(CC.bg.opacity(0.8)))
+                                    .font(.system(size: 11.5, weight: .semibold).monospacedDigit())
+                                    .foregroundStyle(CC.text)
+                                    .padding(.horizontal, 10)
+                                    .frame(height: 28)
+                                    .background(GlassShape(shape: Capsule(), shadow: false))
                                 Image(systemName: "line.3.horizontal")
-                                    .font(.system(size: 14, weight: .bold))
-                                    .foregroundStyle(CC.text2)
-                                    .padding(8)
-                                    .background(Circle().fill(CC.bg.opacity(0.8)))
+                                    .font(.system(size: 13, weight: .bold))
+                                    .foregroundStyle(CC.text)
+                                    .frame(width: 32, height: 32)
+                                    .background(GlassShape(shape: Circle(), shadow: false))
                             }
                         }
                         .padding(6)
@@ -112,7 +121,8 @@ struct TileContainer: View {
             }
             .draggable(TileDrag(pageID: page.id, tileID: tile.id)) {
                 RoundedRectangle(cornerRadius: Metrics.radius, style: .continuous)
-                    .fill(CC.accent.opacity(0.25))
+                    .fill(LinearGradient(colors: [CC.cardTop, CC.card], startPoint: .top, endPoint: .bottom))
+                    .overlay(RoundedRectangle(cornerRadius: Metrics.radius, style: .continuous).strokeBorder(CC.accent.opacity(0.6), lineWidth: 1))
                     .overlay(Text(tileTitle).font(.system(size: 15, weight: .semibold)).foregroundStyle(CC.text))
                     .frame(width: 220, height: 120)
             }
@@ -208,9 +218,10 @@ struct EditCircleLabel: View {
         Image(systemName: symbol)
             .font(.system(size: 13, weight: .bold))
             .foregroundStyle(.white)
-            .frame(width: 30, height: 30)
-            .background(Circle().fill(color))
-            .shadow(color: .black.opacity(0.3), radius: 4, y: 2)
+            .frame(width: 32, height: 32)
+            .background(Circle().fill(LinearGradient(colors: [color.opacity(0.85), color], startPoint: .top, endPoint: .bottom)))
+            .overlay(Circle().strokeBorder(.white.opacity(0.35), lineWidth: 1))
+            .glow(color, spread: 8, opacity: 0.45, y: 3)
     }
 }
 
@@ -220,18 +231,18 @@ struct AddTileButton: View {
 
     var body: some View {
         Button { adding = true } label: {
-            VStack(spacing: 8) {
-                Image(systemName: "plus")
-                    .font(.system(size: 24, weight: .semibold))
-                Text("Add Tile")
+            VStack(spacing: 10) {
+                IconOrb(symbol: "plus", tint: CC.accent, size: 44)
+                Text("Add tile")
                     .font(.system(size: 14, weight: .semibold))
             }
             .foregroundStyle(CC.accent)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(
                 RoundedRectangle(cornerRadius: Metrics.radius, style: .continuous)
-                    .strokeBorder(style: StrokeStyle(lineWidth: 1.5, dash: [6, 5]))
+                    .strokeBorder(style: StrokeStyle(lineWidth: 1.5, dash: [7, 6]))
                     .foregroundStyle(CC.accent.opacity(0.7))
+                    .background(RoundedRectangle(cornerRadius: Metrics.radius, style: .continuous).fill(CC.accent.opacity(0.06)))
             )
         }
         .buttonStyle(PressStyle())
@@ -271,10 +282,13 @@ struct KeysTile: View {
     @State private var editingKey: ButtonDef?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 12) {
             if let title = group.title {
                 HStack {
-                    SectionLabel(title)
+                    Text(title)
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundStyle(CC.text)
+                        .lineLimit(1)
                     Spacer()
                     if model.editing {
                         Button {
@@ -298,7 +312,7 @@ struct KeysTile: View {
                 }
             }
         }
-        .card(padding: 14)
+        .card(padding: 16)
         .sheet(item: $editingKey) { key in
             KeyEditor(pageID: pageID, tileID: tileID, key: key)
         }
@@ -412,9 +426,12 @@ struct AppKeysTile: View {
         let mapped = context.flatMap { model.workspace.mappedPage(for: $0.bundleID) }
         let keys = mapped == pageID ? [] : Array((context.map { model.workspace.keys(forApp: $0.bundleID) } ?? []).prefix(limit))
         VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 8) {
-                AppIconView(bundleID: context?.bundleID, size: 16)
-                SectionLabel("Keys · \(context?.appName ?? "App")")
+            HStack(spacing: 10) {
+                AppIconView(bundleID: context?.bundleID, size: 26)
+                Text("\(context?.appName ?? "App") keys")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundStyle(CC.text)
+                    .lineLimit(1)
             }
             if keys.isEmpty {
                 Text("No keys mapped for \(context?.appName ?? "this app"). Add a page for it in Settings → App Mappings.")
@@ -428,7 +445,7 @@ struct AppKeysTile: View {
                 }
             }
         }
-        .card(padding: 14)
+        .card(padding: 16)
         .animation(.easeOut(duration: 0.2), value: context?.bundleID)
     }
 }

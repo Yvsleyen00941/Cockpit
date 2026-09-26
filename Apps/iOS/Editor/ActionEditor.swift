@@ -481,7 +481,7 @@ struct MacroEditor: View {
             Section {
                 ForEach($steps) { $step in
                     NavigationLink {
-                        Form {
+                        CCForm {
                             ActionEditor(action: $step.action)
                             Section("Then wait") {
                                 Stepper(String(format: "%.2f s", step.delay ?? 0), value: Binding(get: { step.delay ?? 0 }, set: { step.delay = $0 == 0 ? nil : $0 }), in: 0...10, step: 0.05)

@@ -52,6 +52,8 @@ struct SettingsView: View {
             List(Section.allCases, selection: $section) { item in
                 Label(item.title, systemImage: item.symbol).tag(item)
             }
+            .scrollContentBackground(.hidden)
+            .background(SceneBackdrop(mood: .night, dim: 0.1))
             .navigationTitle("Settings")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -80,6 +82,7 @@ struct SettingsView: View {
             }
         }
         .preferredColorScheme(model.theme == .light ? .light : (model.theme == .dark ? .dark : nil))
+        .statusBarHidden()
     }
 }
 
@@ -90,7 +93,7 @@ private struct ConnectionSettings: View {
 
     var body: some View {
         let link = model.link
-        Form {
+        CCForm {
             Section {
                 LabeledContent("Status", value: link.status.isConnected ? "Connected" : "Not connected")
                 LabeledContent("Mac", value: link.macName ?? "—")
@@ -151,7 +154,7 @@ private struct PagesSettings: View {
     @State private var editing: Page?
 
     var body: some View {
-        Form {
+        CCForm {
             Section {
                 Button("Edit the Current Page on Screen", systemImage: "square.and.pencil") {
                     model.editing = true
@@ -213,7 +216,7 @@ private struct PageDetails: View {
 
     var body: some View {
         NavigationStack {
-            Form {
+            CCForm {
                 TextField("Title", text: $page.title)
                 Button {
                     pickingSymbol = true
@@ -275,7 +278,7 @@ private struct MappingsSettings: View {
 
     var body: some View {
         let mappings = model.workspace.rules.filter { $0.match.isSimpleAppMapping }
-        Form {
+        CCForm {
             Section {
                 ForEach(mappings) { rule in
                     HStack(spacing: 12) {
@@ -330,7 +333,7 @@ private struct RulesSettings: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
-        Form {
+        CCForm {
             Section {
                 if let resolution = model.navigator.resolution {
                     LabeledContent("Showing", value: model.workspace.page(resolution.pageID)?.title ?? resolution.pageID)
@@ -374,7 +377,7 @@ private struct RuleEditor: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
-        Form {
+        CCForm {
             TextField("Name", text: $rule.name)
             Toggle("Enabled", isOn: $rule.enabled)
             Stepper("Priority \(rule.priority)", value: $rule.priority, in: 0...100)
@@ -421,7 +424,7 @@ private struct StripSettings: View {
 
     var body: some View {
         let strip = model.workspace.strip
-        Form {
+        CCForm {
             Section("Quick keys (always visible)") {
                 ForEach(strip.keys) { key in
                     Button {
@@ -467,7 +470,7 @@ private struct ScenesSettings: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
-        Form {
+        CCForm {
             Section {
                 ForEach(model.workspace.scenes) { scene in
                     NavigationLink {
@@ -502,7 +505,7 @@ private struct SceneEditor: View {
     @State private var pickingSymbol = false
 
     var body: some View {
-        Form {
+        CCForm {
             TextField("Name", text: $scene.name)
             Button {
                 pickingSymbol = true
@@ -551,7 +554,7 @@ private struct SourcesSettings: View {
     @State private var saved: ActionResult?
 
     var body: some View {
-        Form {
+        CCForm {
             Section("Status on the Mac") {
                 ForEach(model.store.helper?.integrations ?? []) { status in
                     HStack(spacing: 10) {
@@ -656,7 +659,7 @@ private struct MorningSettings: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
-        Form {
+        CCForm {
             Section("Morning Brief") {
                 TextField("Your name", text: pref(\.ownerName))
                 Stepper("Shows from \(clock(model.workspace.preferences.morningStart))", value: pref(\.morningStart), in: 0...(23 * 60), step: 30)
@@ -704,7 +707,7 @@ private struct AppearanceSettings: View {
 
     var body: some View {
         @Bindable var model = model
-        Form {
+        CCForm {
             Section {
                 Picker("Theme", selection: $model.theme) {
                     ForEach(ThemeChoice.allCases) { Text($0.title).tag($0) }
@@ -740,7 +743,7 @@ private struct PermissionsSettings: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
-        Form {
+        CCForm {
             Section {
                 ForEach(model.store.helper?.permissions ?? []) { permission in
                     HStack(spacing: 12) {
@@ -769,7 +772,7 @@ private struct TransferSettings: View {
     @State private var confirmReset = false
 
     var body: some View {
-        Form {
+        CCForm {
             Section {
                 ShareLink(item: WorkspaceFile(workspace: model.workspace), preview: SharePreview("ControlCenter layout", image: Image(systemName: "square.grid.2x2"))) {
                     Label("Export Layout as JSON", systemImage: "square.and.arrow.up")
@@ -826,7 +829,7 @@ private struct AboutSettings: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
-        Form {
+        CCForm {
             Section {
                 HStack(spacing: 16) {
                     BrandMark().frame(width: 64, height: 64)

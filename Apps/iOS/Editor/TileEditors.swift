@@ -13,7 +13,7 @@ struct TileInspector: View {
 
     var body: some View {
         NavigationStack {
-            Form {
+            CCForm {
                 if let binding = Binding($tile) {
                     content(binding)
                     Section("Size") {
@@ -280,7 +280,7 @@ struct KeyEditor: View {
 
     var body: some View {
         NavigationStack {
-            Form {
+            CCForm {
                 Section {
                     HStack {
                         Spacer()

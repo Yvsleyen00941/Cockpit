@@ -50,7 +50,7 @@ private struct DeskTab: View {
             .padding(.horizontal, 14)
             .padding(.bottom, 24)
         }
-        .background(CC.bg)
+        .background(SceneBackdrop(mood: .sunrise))
         .navigationTitle(BriefComposer.greeting(name: model.workspace.preferences.ownerName, at: .now))
     }
 
@@ -137,7 +137,7 @@ private struct RemoteTab: View {
             }
             .padding(14)
         }
-        .background(CC.bg)
+        .background(SceneBackdrop(mood: .cobalt))
         .navigationTitle("Remote")
     }
 
@@ -194,7 +194,7 @@ struct PhonePageView: View {
             }
             .padding(12)
         }
-        .background(CC.bg)
+        .background(SceneBackdrop(mood: SceneMood.page(page.id)))
         .navigationTitle(page.title)
         .onAppear { model.show(page: page.id) }
     }

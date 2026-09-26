@@ -4,7 +4,7 @@ import SwiftUI
 
 // MARK: - Home quadrant
 
-/// P&L today, positions, last action, a live sparkline and a big PAUSE.
+/// P&L today, positions, last action, a live sparkline and a big Pause.
 struct BotSummaryTile: View {
     @Environment(AppModel.self) private var model
 
@@ -12,45 +12,45 @@ struct BotSummaryTile: View {
         BotGate { bot in
             GeometryReader { proxy in
                 let roomy = proxy.size.height > 250
-                VStack(alignment: .leading, spacing: roomy ? 14 : 10) {
-                    CardHeader(title: "Trading Bot", symbol: "chart.line.uptrend.xyaxis") {
+                let narrow = proxy.size.width < 440
+                VStack(alignment: .leading, spacing: roomy ? 12 : 8) {
+                    CardHeader(title: "Trading bot", symbol: "chart.line.uptrend.xyaxis") {
                         HStack(spacing: 6) {
                             if bot.mode == .simulated { Pill(text: "Sim", color: CC.purple) }
                             Pill(text: bot.status.title, color: bot.status.color, dot: true)
-                            Image(systemName: "arrow.up.right")
-                                .font(.system(size: 12, weight: .bold))
-                                .foregroundStyle(CC.text3)
+                            if !narrow { GoToBadge() }
                         }
                     }
                     HStack(alignment: .center, spacing: 16) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            RollingMoney(value: bot.pnlToday, currency: bot.currency, size: roomy ? 52 : 40)
+                        VStack(alignment: .leading, spacing: 2) {
+                            RollingMoney(value: bot.pnlToday, currency: bot.currency, size: roomy ? 56 : 42)
                             HStack(spacing: 8) {
                                 Text(Fmt.percent(bot.pnlTodayPct ?? 0))
                                     .font(.system(size: 15, weight: .semibold).monospacedDigit())
                                     .foregroundStyle(CC.pnl(bot.pnlToday))
                                 Text("today")
-                                    .font(.system(size: 13))
+                                    .font(.system(size: 14))
                                     .foregroundStyle(CC.text2)
-                                if let equity = bot.equity {
+                                if let equity = bot.equity, !narrow {
                                     Text("·").foregroundStyle(CC.text3)
                                     Text("Equity \(Fmt.money(equity, currency: bot.currency, decimals: 0))")
-                                        .font(.system(size: 13).monospacedDigit())
+                                        .font(.system(size: 14).monospacedDigit())
                                         .foregroundStyle(CC.text2)
                                 }
                             }
+                            .lineLimit(1)
                         }
                         Spacer(minLength: 8)
-                        pauseButton(bot, height: roomy ? 80 : 60)
-                            .frame(width: min(180, proxy.size.width * 0.34))
+                        pauseButton(bot, height: roomy ? 62 : 52)
+                            .frame(width: min(170, proxy.size.width * 0.3))
                     }
                     Sparkline(values: WidgetSnapshot.downsample(model.store.botSeries?.points ?? [], to: 90).map(\.v) + [bot.pnlToday], color: CC.pnl(bot.pnlToday), baseline: 0)
                         .frame(maxHeight: .infinity)
-                    HStack(spacing: 22) {
-                        Stat(label: "Positions", value: "\(bot.positions.count)", size: 20)
-                        Stat(label: "Trades", value: "\(bot.tradesToday)", size: 20)
+                    HStack(spacing: 26) {
+                        Stat(label: "Positions", value: "\(bot.positions.count)", size: 22)
+                        Stat(label: "Trades", value: "\(bot.tradesToday)", size: 22)
                         if let last = bot.lastEvent {
-                            VStack(alignment: .leading, spacing: 4) {
+                            VStack(alignment: .leading, spacing: 5) {
                                 SectionLabel("Last · \(Fmt.ago(last.time))")
                                 LastTradeLine(event: last)
                             }
@@ -83,12 +83,10 @@ struct LastTradeLine: View {
     let event: BotEvent
 
     var body: some View {
-        HStack(spacing: 6) {
-            Text(event.kind == .buy ? "BUY" : "SELL")
-                .font(.system(size: 11, weight: .bold, design: .monospaced))
-                .foregroundStyle(event.kind == .buy ? CC.green : CC.red)
+        HStack(spacing: 7) {
+            Tag(text: event.kind == .buy ? "BUY" : "SELL", color: event.kind == .buy ? CC.green : CC.red)
             Text([event.symbol, event.price.map(Fmt.price)].compactMap { $0 }.joined(separator: " @ "))
-                .font(.system(size: 13, weight: .medium, design: .monospaced))
+                .font(.system(size: 14, weight: .medium).monospacedDigit())
                 .foregroundStyle(CC.text)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
@@ -98,30 +96,31 @@ struct LastTradeLine: View {
 
 // MARK: - P&L chart
 
-/// Full-width P&L for today: line + area, green above zero, red below.
+/// Full-width P&L for today: a glowing line over a soft area, green above
+/// zero, red below.
 struct BotChartTile: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
         BotGate { bot in
-            VStack(alignment: .leading, spacing: 12) {
-                CardHeader(title: "P&L Today", symbol: "chart.xyaxis.line") {
+            VStack(alignment: .leading, spacing: 10) {
+                CardHeader(title: "P&L today", symbol: "chart.xyaxis.line") {
                     HStack(spacing: 6) {
                         if bot.mode == .simulated { Pill(text: "Sim", color: CC.purple) }
                         Pill(text: bot.status.title, color: bot.status.color, dot: true)
                     }
                 }
                 HStack(alignment: .firstTextBaseline, spacing: 14) {
-                    RollingMoney(value: bot.pnlToday, currency: bot.currency, size: 56)
+                    RollingMoney(value: bot.pnlToday, currency: bot.currency, size: 60)
                     Text(Fmt.percent(bot.pnlTodayPct ?? 0))
-                        .font(.system(size: 20, weight: .semibold).monospacedDigit())
+                        .font(.system(size: 20, weight: .medium).monospacedDigit())
                         .foregroundStyle(CC.pnl(bot.pnlToday))
                     Spacer()
                     VStack(alignment: .trailing, spacing: 3) {
-                        SectionLabel("High / Low")
+                        SectionLabel("High / low")
                         Text(highLow(bot))
-                            .font(.system(size: 14, weight: .medium).monospacedDigit())
-                            .foregroundStyle(CC.text2)
+                            .font(.system(size: 15, weight: .regular).monospacedDigit())
+                            .foregroundStyle(CC.text)
                     }
                 }
                 PnLChart(points: points(bot), currency: bot.currency)
@@ -159,48 +158,57 @@ struct PnLChart: View {
             .init(color: CC.red, location: zero),
             .init(color: CC.red, location: 1),
         ]
+        let lastColor = CC.pnl(points.last?.v ?? 0)
         let areaStops: [Gradient.Stop] = [
-            .init(color: CC.green.opacity(0.34), location: 0),
-            .init(color: CC.green.opacity(0.04), location: zero),
-            .init(color: CC.red.opacity(0.04), location: zero),
-            .init(color: CC.red.opacity(0.34), location: 1),
+            .init(color: CC.green.opacity(0.3), location: 0),
+            .init(color: CC.green.opacity(0.02), location: zero),
+            .init(color: CC.red.opacity(0.02), location: zero),
+            .init(color: CC.red.opacity(0.3), location: 1),
         ]
         Chart {
             ForEach(Array(points.enumerated()), id: \.offset) { _, point in
+                // The glow: the same curve, wide and faint, under the line.
+                LineMark(x: .value("Time", point.t), y: .value("P&L", point.v), series: .value("Layer", "glow"))
+                    .foregroundStyle(lastColor.opacity(0.2))
+                    .lineStyle(StrokeStyle(lineWidth: 8, lineCap: .round, lineJoin: .round))
+                    .interpolationMethod(.monotone)
                 AreaMark(x: .value("Time", point.t), yStart: .value("Zero", 0), yEnd: .value("P&L", point.v))
                     .foregroundStyle(LinearGradient(stops: areaStops, startPoint: .top, endPoint: .bottom))
                     .interpolationMethod(.monotone)
-                LineMark(x: .value("Time", point.t), y: .value("P&L", point.v))
+                LineMark(x: .value("Time", point.t), y: .value("P&L", point.v), series: .value("Layer", "line"))
                     .foregroundStyle(LinearGradient(stops: lineStops, startPoint: .top, endPoint: .bottom))
-                    .lineStyle(StrokeStyle(lineWidth: 2.2, lineCap: .round, lineJoin: .round))
+                    .lineStyle(StrokeStyle(lineWidth: 2.4, lineCap: .round, lineJoin: .round))
                     .interpolationMethod(.monotone)
             }
             RuleMark(y: .value("Zero", 0))
-                .foregroundStyle(CC.text3.opacity(0.8))
-                .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 4]))
+                .foregroundStyle(CC.text3.opacity(0.7))
+                .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 5]))
             if let last = points.last {
                 PointMark(x: .value("Time", last.t), y: .value("P&L", last.v))
-                    .symbolSize(70)
-                    .foregroundStyle(CC.pnl(last.v))
+                    .symbolSize(420)
+                    .foregroundStyle(CC.pnl(last.v).opacity(0.18))
+                PointMark(x: .value("Time", last.t), y: .value("P&L", last.v))
+                    .symbolSize(60)
+                    .foregroundStyle(.white)
             }
         }
         .chartYScale(domain: (low - span * 0.08)...(high + span * 0.12))
         .chartXAxis {
             AxisMarks(values: .stride(by: .hour, count: 3)) { value in
-                AxisGridLine().foregroundStyle(CC.divider.opacity(0.6))
+                AxisGridLine().foregroundStyle(CC.divider)
                 AxisValueLabel {
                     if let date = value.as(Date.self) {
-                        Text(Fmt.clock(date)).font(.system(size: 10).monospacedDigit()).foregroundStyle(CC.text2)
+                        Text(Fmt.clock(date)).font(.system(size: 11).monospacedDigit()).foregroundStyle(CC.text3)
                     }
                 }
             }
         }
         .chartYAxis {
             AxisMarks(position: .trailing, values: .automatic(desiredCount: 4)) { value in
-                AxisGridLine().foregroundStyle(CC.divider.opacity(0.6))
+                AxisGridLine().foregroundStyle(CC.divider)
                 AxisValueLabel {
                     if let v = value.as(Double.self) {
-                        Text(Fmt.compactMoney(v, currency: currency)).font(.system(size: 10).monospacedDigit()).foregroundStyle(CC.text2)
+                        Text(Fmt.compactMoney(v, currency: currency)).font(.system(size: 11).monospacedDigit()).foregroundStyle(CC.text3)
                     }
                 }
             }
@@ -217,26 +225,27 @@ struct BotActionsTile: View {
     var body: some View {
         BotGate { bot in
             GeometryReader { proxy in
-                let height = min(Metrics.largeButton, (proxy.size.height - 24 - (proxy.size.height > 330 ? 76 : 0)) / 3)
+                let showsTotals = proxy.size.height > 330
+                let height = min(Metrics.largeButton, (proxy.size.height - 24 - (showsTotals ? 80 : 0)) / 3)
                 VStack(spacing: 12) {
-                    LargeActionButton(title: "Pause Bot", symbol: "pause.fill", color: CC.orange, style: bot.status == .running ? .filled : .tinted, height: height, enabled: bot.status == .running) {
+                    LargeActionButton(title: "Pause bot", symbol: "pause.fill", color: CC.orange, style: bot.status == .running ? .filled : .tinted, height: height, enabled: bot.status == .running) {
                         model.send(.bot(.pause))
                     }
-                    LargeActionButton(title: "Resume Bot", symbol: "play.fill", color: CC.green, style: bot.status == .paused ? .filled : .tinted, height: height, enabled: bot.status != .running) {
+                    LargeActionButton(title: "Resume bot", symbol: "play.fill", color: CC.green, style: bot.status == .paused ? .filled : .tinted, height: height, enabled: bot.status != .running) {
                         model.send(.bot(.resume))
                     }
-                    LargeActionButton(title: "Close All", symbol: "xmark.octagon.fill", color: CC.red, style: .tinted, height: height, enabled: !bot.positions.isEmpty, hold: true, subtitle: bot.positions.isEmpty ? "No open positions" : "Hold · \(bot.positions.count) position\(bot.positions.count == 1 ? "" : "s")") {
+                    LargeActionButton(title: "Close all", symbol: "xmark.octagon.fill", color: CC.red, style: .tinted, height: height, enabled: !bot.positions.isEmpty, hold: true, subtitle: bot.positions.isEmpty ? "No open positions" : "Hold · \(bot.positions.count) position\(bot.positions.count == 1 ? "" : "s")") {
                         model.confirmation = PendingConfirmation(key: ButtonDef(id: "bot.closeAll", label: "Close All Positions", symbol: "xmark.octagon.fill", color: .red, action: .bot(.closeAll), confirm: .dialog), pageID: "bot")
                     }
-                    if proxy.size.height > 330 {
+                    if showsTotals {
                         Spacer(minLength: 0)
-                        Divider().overlay(CC.divider)
+                        Rectangle().fill(CC.divider).frame(height: 1)
                         HStack {
-                            Stat(label: "Realised", value: Fmt.money(bot.pnlToday - bot.unrealizedTotal, currency: bot.currency, signed: true), color: CC.pnl(bot.pnlToday - bot.unrealizedTotal), size: 17)
+                            Stat(label: "Realised", value: Fmt.money(bot.pnlToday - bot.unrealizedTotal, currency: bot.currency, signed: true), color: CC.pnl(bot.pnlToday - bot.unrealizedTotal), size: 18)
                             Spacer()
-                            Stat(label: "Unrealised", value: Fmt.money(bot.unrealizedTotal, currency: bot.currency, signed: true), color: CC.pnl(bot.unrealizedTotal), size: 17)
+                            Stat(label: "Unrealised", value: Fmt.money(bot.unrealizedTotal, currency: bot.currency, signed: true), color: CC.pnl(bot.unrealizedTotal), size: 18)
                             Spacer()
-                            Stat(label: "Exposure", value: Fmt.compactMoney(bot.positions.reduce(0) { $0 + abs($1.quantity * $1.currentPrice) }, currency: bot.currency), size: 17)
+                            Stat(label: "Exposure", value: Fmt.compactMoney(bot.positions.reduce(0) { $0 + abs($1.quantity * $1.currentPrice) }, currency: bot.currency), size: 18)
                         }
                     }
                 }
@@ -255,7 +264,7 @@ struct BotHealthTile: View {
         BotGate { bot in
             TimelineView(.periodic(from: .now, by: 1)) { context in
                 HStack(spacing: 0) {
-                    chip(bot.apiConnected ? "API Connected" : "API Down", symbol: "antenna.radiowaves.left.and.right", color: bot.apiConnected ? CC.green : CC.red, dot: true)
+                    chip(bot.apiConnected ? "API connected" : "API down", symbol: "antenna.radiowaves.left.and.right", color: bot.apiConnected ? CC.green : CC.red, dot: true)
                     divider
                     chip("Heartbeat \(bot.lastHeartbeat.map { Fmt.ago($0, from: context.date) } ?? "—")", symbol: "waveform.path.ecg", color: heartbeatColor(bot, now: context.date))
                     divider
@@ -271,14 +280,14 @@ struct BotHealthTile: View {
                     Spacer(minLength: 0)
                 }
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 18)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(CardBackground())
         }
     }
 
     private var divider: some View {
-        Rectangle().fill(CC.divider).frame(width: 1, height: 18).padding(.horizontal, 14)
+        Rectangle().fill(CC.divider).frame(width: 1, height: 20).padding(.horizontal, 16)
     }
 
     private func heartbeatColor(_ bot: BotState, now: Date) -> Color {
@@ -288,13 +297,16 @@ struct BotHealthTile: View {
     }
 
     private func chip(_ text: String, symbol: String, color: Color, dot: Bool = false) -> some View {
-        HStack(spacing: 7) {
-            if dot { StatusDot(color: color, size: 7) } else {
-                Image(systemName: symbol).font(.system(size: 12, weight: .semibold)).foregroundStyle(color)
+        HStack(spacing: 9) {
+            if dot {
+                GlossyOrb(color: color, size: 10)
+            } else {
+                Image(systemName: symbol)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(color)
             }
-            Text(text.uppercased())
-                .font(.system(size: 11.5, weight: .semibold).monospacedDigit())
-                .tracking(0.8)
+            Text(text)
+                .font(.system(size: 14, weight: .medium).monospacedDigit())
                 .foregroundStyle(CC.text)
                 .lineLimit(1)
         }
@@ -308,43 +320,44 @@ struct BotPositionsTile: View {
 
     var body: some View {
         BotGate { bot in
-            VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: 12) {
                 CardHeader(title: "Positions", symbol: "list.bullet.rectangle") {
-                    Text("Unrealised \(Fmt.money(bot.unrealizedTotal, currency: bot.currency, signed: true))")
-                        .font(.system(size: 12, weight: .semibold).monospacedDigit())
-                        .foregroundStyle(CC.pnl(bot.unrealizedTotal))
+                    HStack(spacing: 6) {
+                        Text("Unrealised")
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundStyle(CC.text2)
+                        Text(Fmt.money(bot.unrealizedTotal, currency: bot.currency, signed: true))
+                            .font(.system(size: 14, weight: .semibold).monospacedDigit())
+                            .foregroundStyle(CC.pnl(bot.unrealizedTotal))
+                    }
                 }
                 if bot.positions.isEmpty {
                     Text("Flat — no open positions.")
-                        .font(.system(size: 14))
+                        .font(.system(size: 15))
                         .foregroundStyle(CC.text2)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
-                    Grid(alignment: .trailing, horizontalSpacing: 14, verticalSpacing: 0) {
+                    Grid(alignment: .trailing, horizontalSpacing: 16, verticalSpacing: 0) {
                         GridRow {
-                            Text("SYMBOL").gridColumnAlignment(.leading)
-                            Text("SIDE").gridColumnAlignment(.leading)
-                            Text("QTY")
-                            Text("ENTRY")
-                            Text("LAST")
+                            Text("Symbol").gridColumnAlignment(.leading)
+                            Text("Side").gridColumnAlignment(.leading)
+                            Text("Qty")
+                            Text("Entry")
+                            Text("Last")
                             Text("P&L")
                             Text("%")
                         }
-                        .font(.system(size: 10.5, weight: .semibold))
-                        .tracking(0.9)
-                        .foregroundStyle(CC.text2)
+                        .font(.system(size: 12.5, weight: .medium))
+                        .foregroundStyle(CC.text3)
                         .padding(.bottom, 8)
                         ForEach(bot.positions) { position in
-                            Divider().overlay(CC.divider).gridCellUnsizedAxes(.horizontal)
+                            Rectangle().fill(CC.divider).frame(height: 1).gridCellUnsizedAxes(.horizontal)
                             GridRow {
                                 Text(position.symbol)
-                                    .font(.system(size: 14, weight: .semibold))
+                                    .font(.system(size: 15, weight: .semibold))
                                     .foregroundStyle(CC.text)
                                     .gridColumnAlignment(.leading)
-                                Text(position.side == .long ? "LONG" : "SHORT")
-                                    .font(.system(size: 10, weight: .bold))
-                                    .tracking(0.6)
-                                    .foregroundStyle(position.side == .long ? CC.green : CC.red)
+                                Tag(text: position.side == .long ? "LONG" : "SHORT", color: position.side == .long ? CC.green : CC.red)
                                     .gridColumnAlignment(.leading)
                                 Text(Fmt.quantity(position.quantity))
                                 Text(Fmt.price(position.entryPrice)).foregroundStyle(CC.text2)
@@ -356,9 +369,9 @@ struct BotPositionsTile: View {
                                 Text(Fmt.percent(position.unrealizedPct, decimals: 2))
                                     .foregroundStyle(CC.pnl(position.unrealizedPnL))
                             }
-                            .font(.system(size: 13, weight: .medium).monospacedDigit())
+                            .font(.system(size: 14, weight: .regular).monospacedDigit())
                             .foregroundStyle(CC.text)
-                            .padding(.vertical, 8)
+                            .padding(.vertical, 10)
                             .animation(.snappy, value: position.currentPrice)
                         }
                     }
@@ -372,32 +385,33 @@ struct BotPositionsTile: View {
 
 // MARK: - Log
 
-/// Last buy/sell events in SF Mono — the terminal feed.
+/// Last buy/sell events — the terminal feed.
 struct BotLogTile: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 12) {
             CardHeader(title: "Activity", symbol: "text.alignleft") {
-                Text("last 10")
-                    .font(.system(size: 11))
+                Text("Last 10")
+                    .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(CC.text3)
             }
-            let events = Array((model.store.botEvents?.events ?? []).prefix(10))
-            if events.isEmpty {
+            let all = Array((model.store.botEvents?.events ?? []).prefix(10))
+            if all.isEmpty {
                 Text("No trades yet today.")
-                    .font(CCFont.mono)
+                    .font(.system(size: 15))
                     .foregroundStyle(CC.text2)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                VStack(alignment: .leading, spacing: 7) {
+                GeometryReader { proxy in
+                let events = Array(all.prefix(max(1, Int((proxy.size.height + 8) / 29))))
+                VStack(alignment: .leading, spacing: 8) {
                     ForEach(events) { event in
-                        HStack(spacing: 8) {
+                        HStack(spacing: 10) {
                             Text(Fmt.clock(event.time, seconds: true))
                                 .foregroundStyle(CC.text3)
-                            Text(tag(event))
-                                .foregroundStyle(color(event))
-                                .frame(width: 42, alignment: .leading)
+                            Tag(text: tag(event), color: color(event))
+                                .frame(width: 58, alignment: .leading)
                             Text(line(event))
                                 .foregroundStyle(CC.text)
                                 .lineLimit(1)
@@ -406,15 +420,16 @@ struct BotLogTile: View {
                                 Text(Fmt.money(pnl, signed: true))
                                     .foregroundStyle(CC.pnl(pnl))
                             } else if let outcome = event.outcome {
-                                Text(outcome.uppercased()).foregroundStyle(CC.text2)
+                                Text(outcome.capitalized).foregroundStyle(CC.text3)
                             }
                         }
-                        .font(CCFont.mono)
+                        .font(.system(size: 12.5, design: .monospaced))
                         .transition(.move(edge: .top).combined(with: .opacity))
                     }
                     Spacer(minLength: 0)
                 }
                 .animation(.spring(response: 0.4, dampingFraction: 0.85), value: events.map(\.id))
+                }
             }
         }
         .card()
@@ -458,29 +473,29 @@ struct BotOvernightTile: View {
 
     var body: some View {
         BotGate { bot in
-            VStack(alignment: .leading, spacing: 12) {
-                CardHeader(title: "Bot Overnight", symbol: "moon.stars.fill") {
+            VStack(alignment: .leading, spacing: 10) {
+                CardHeader(title: "Bot overnight", symbol: "moon.stars.fill", tint: CC.indigo) {
                     if bot.mode == .simulated { Pill(text: "Sim", color: CC.purple) }
                 }
                 if let night = bot.overnight {
-                    RollingMoney(value: night.pnl, currency: bot.currency, size: 40)
+                    RollingMoney(value: night.pnl, currency: bot.currency, size: 46)
                     Text("\(night.trades) trade\(night.trades == 1 ? "" : "s") between \(Fmt.clock(night.from)) and \(Fmt.clock(night.to))")
-                        .font(.system(size: 13))
+                        .font(.system(size: 14))
                         .foregroundStyle(CC.text2)
                 } else {
                     Text("Quiet night")
-                        .font(CCFont.heading(26))
+                        .font(CCFont.title(30, weight: .light))
                         .foregroundStyle(CC.text)
                     Text("No trades since 22:00.")
-                        .font(.system(size: 13))
+                        .font(.system(size: 14))
                         .foregroundStyle(CC.text2)
                 }
                 Spacer(minLength: 0)
-                Divider().overlay(CC.divider)
+                Rectangle().fill(CC.divider).frame(height: 1)
                 HStack {
-                    Stat(label: "Today", value: Fmt.money(bot.pnlToday, currency: bot.currency, signed: true), color: CC.pnl(bot.pnlToday), size: 18)
+                    Stat(label: "Today", value: Fmt.money(bot.pnlToday, currency: bot.currency, signed: true), color: CC.pnl(bot.pnlToday), size: 19)
                     Spacer()
-                    Stat(label: "Status", value: bot.status.title, color: bot.status.color, size: 18)
+                    Stat(label: "Status", value: bot.status.title, color: bot.status.color, size: 19)
                 }
             }
             .card()

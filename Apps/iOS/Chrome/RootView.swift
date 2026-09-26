@@ -27,23 +27,24 @@ struct RootView: View {
     }
 }
 
-/// Top bar (50 pt) · page · bottom strip (80 pt), plus every overlay.
+/// The scene, and on it: the top bar · the page · the dock, plus every overlay.
 struct SurfaceView: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
         @Bindable var model = model
         ZStack(alignment: .top) {
-            CC.bg.ignoresSafeArea()
+            SceneLayer(mood: SceneMood.page(model.currentPage?.id))
             VStack(spacing: 0) {
                 TopBar()
                 PageHost()
                     .padding(.horizontal, 20)
-                    .padding(.top, 14)
+                    .padding(.top, 2)
                     .padding(.bottom, 12)
                 BottomStrip()
             }
-            .blur(radius: dimmed ? 2.5 : 0)
+            .ignoresSafeArea(.container, edges: .bottom)
+            .blur(radius: dimmed ? 6 : 0)
             .allowsHitTesting(!dimmed)
 
             if dimmed {
@@ -52,7 +53,7 @@ struct SurfaceView: View {
             }
 
             ToastHost()
-                .padding(.top, Metrics.topBar + 10)
+                .padding(.top, Metrics.topBar + 8)
 
             if showAmbient {
                 AmbientView()
@@ -115,8 +116,8 @@ struct SurfaceView: View {
     }
 }
 
-/// The current page, cross-fading with a slight scale (0.95 → 1) over 250 ms
-/// whenever the context changes it.
+/// The current page. When the context changes it, the old page fades and the
+/// new page's tiles rise into place one after another.
 struct PageHost: View {
     @Environment(AppModel.self) private var model
 
@@ -125,10 +126,25 @@ struct PageHost: View {
             if let page = model.currentPage {
                 PageView(page: page)
                     .id(page.id)
-                    .transition(.asymmetric(insertion: .opacity.combined(with: .scale(scale: 0.95)), removal: .opacity))
+                    .transition(.asymmetric(insertion: .opacity, removal: .opacity.combined(with: .scale(scale: 0.98))))
             }
         }
-        .animation(.easeOut(duration: 0.25), value: model.currentPage?.id)
+        .animation(.easeOut(duration: 0.22), value: model.currentPage?.id)
+    }
+}
+
+/// The scene behind the surface; a new page's mood crossfades in.
+struct SceneLayer: View {
+    var mood: SceneMood
+
+    var body: some View {
+        ZStack {
+            SceneBackdrop(mood: mood)
+                .id(mood.name)
+                .transition(.opacity)
+        }
+        .animation(.easeInOut(duration: 1.1), value: mood.name)
+        .ignoresSafeArea()
     }
 }
 
@@ -140,13 +156,13 @@ struct DisconnectedOverlay: View {
 
     var body: some View {
         ZStack {
-            Color.black.opacity(0.55).ignoresSafeArea()
-            VStack(spacing: 22) {
+            CC.ink.opacity(0.45).ignoresSafeArea()
+            VStack(spacing: 24) {
                 Radar()
                     .frame(width: 180, height: 180)
                 VStack(spacing: 8) {
                     Text(title)
-                        .font(.system(size: 24, weight: .semibold))
+                        .font(CCFont.title(28, weight: .light))
                         .foregroundStyle(CC.text)
                     Text(detail)
                         .font(.system(size: 14))
@@ -155,13 +171,14 @@ struct DisconnectedOverlay: View {
                         .frame(maxWidth: 420)
                 }
                 HStack(spacing: 12) {
-                    Button("Try Now") { model.link.appBecameActive() }
-                        .buttonStyle(CapsuleButtonStyle(color: CC.accent))
-                    Button("Explore Demo") { model.setDemo(true) }
-                        .buttonStyle(CapsuleButtonStyle(color: CC.text2))
+                    Button("Try now") { model.link.appBecameActive() }
+                        .buttonStyle(GlowCapsuleStyle())
+                    Button("Explore the demo") { model.setDemo(true) }
+                        .buttonStyle(CapsuleButtonStyle(color: CC.text))
                 }
             }
-            .padding(40)
+            .padding(44)
+            .background(CardBackground(radius: 34))
         }
     }
 
@@ -173,8 +190,13 @@ struct DisconnectedOverlay: View {
     }
 
     private var detail: String {
-        if let error = model.link.lastError { return error }
-        return "Make sure ControlCenter Helper is running and both devices are on the same Wi-Fi — or plug in the USB-C cable. Reconnects on its own."
+        let hint = "Make sure ControlCenter Helper is running and both devices are on the same Wi-Fi — or plug in the USB-C cable. Reconnects on its own."
+        guard let error = model.link.lastError else { return hint }
+        // Plain language for the usual suspects; the raw error stays in the connection details.
+        if error.contains("refused") { return "Your Mac is on the network, but ControlCenter Helper isn't running. Open it from Applications — this reconnects on its own." }
+        if error.localizedCaseInsensitiveContains("timed out") || error.contains("timeout") { return "Your Mac didn't answer. " + hint }
+        if error.localizedCaseInsensitiveContains("authentication") { return "Your Mac didn't recognise this iPad. Pair it again from Settings → Connection." }
+        return hint
     }
 }
 
@@ -186,20 +208,21 @@ struct Radar: View {
                 ForEach(0..<3) { ring in
                     let phase = (t / 2.4 + Double(ring) / 3).truncatingRemainder(dividingBy: 1)
                     Circle()
-                        .strokeBorder(CC.accent.opacity(0.55 * (1 - phase)), lineWidth: 1.5)
+                        .strokeBorder(CC.accent.opacity(0.6 * (1 - phase)), lineWidth: 1.2)
                         .scaleEffect(0.3 + phase * 0.7)
                 }
                 Circle()
-                    .fill(RadialGradient(colors: [CC.accent.opacity(0.35), .clear], center: .center, startRadius: 0, endRadius: 60))
-                    .frame(width: 110, height: 110)
+                    .fill(RadialGradient(colors: [CC.accent.opacity(0.4), .clear], center: .center, startRadius: 0, endRadius: 64))
+                    .frame(width: 120, height: 120)
                 Image(systemName: "laptopcomputer")
-                    .font(.system(size: 38, weight: .light))
+                    .font(.system(size: 38, weight: .ultraLight))
                     .foregroundStyle(CC.text)
             }
         }
     }
 }
 
+/// A glass capsule button — the quiet sibling of `GlowCapsuleStyle`.
 struct CapsuleButtonStyle: ButtonStyle {
     var color: Color
 
@@ -207,10 +230,9 @@ struct CapsuleButtonStyle: ButtonStyle {
         configuration.label
             .font(.system(size: 15, weight: .semibold))
             .foregroundStyle(color)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 11)
-            .background(Capsule().fill(color.opacity(0.16)))
-            .overlay(Capsule().strokeBorder(color.opacity(0.35), lineWidth: 1))
+            .padding(.horizontal, 22)
+            .frame(height: 46)
+            .background(GlassShape(shape: Capsule(), shadow: false))
             .scaleEffect(configuration.isPressed ? 0.96 : 1)
             .animation(.spring(response: 0.2, dampingFraction: 0.7), value: configuration.isPressed)
     }
@@ -241,9 +263,8 @@ struct ToastView: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: toast.symbol ?? symbol)
-                .font(.system(size: 20, weight: .semibold))
-                .foregroundStyle(tint)
+            IconOrb(symbol: toast.symbol ?? symbol, tint: tint, size: 38)
+                .glow(tint, spread: 10, opacity: 0.4, y: 0)
             VStack(alignment: .leading, spacing: 2) {
                 Text(toast.title)
                     .font(.system(size: 14, weight: .semibold, design: toast.style == .trade ? .monospaced : .default))
@@ -257,15 +278,10 @@ struct ToastView: View {
             }
             Spacer(minLength: 0)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(.ultraThinMaterial)
-                .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(CC.card.opacity(0.75)))
-        )
-        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(tint.opacity(0.45), lineWidth: 1))
-        .shadow(color: .black.opacity(0.35), radius: 18, y: 8)
+        .padding(.leading, 12)
+        .padding(.trailing, 18)
+        .padding(.vertical, 11)
+        .background(CardBackground(highlight: tint, radius: 24))
     }
 
     private var tint: Color {
@@ -309,14 +325,14 @@ struct PromptSheet: View {
                     .font(.system(size: 20))
                     .lineLimit(1...4)
                     .padding(14)
-                    .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(CC.elevated))
+                    .background(Well(radius: 16))
                     .focused($focused)
                     .submitLabel(.send)
                     .onSubmit(submit)
                 Spacer()
             }
             .padding(20)
-            .background(CC.bg)
+            .background(SceneBackdrop(mood: .cobalt))
             .navigationTitle(prompt.title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -353,7 +369,7 @@ struct OutputSheet: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(18)
             }
-            .background(CC.bg)
+            .background(SceneBackdrop(mood: .terminal, dim: 0.25))
             .navigationTitle(item.title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -378,35 +394,39 @@ struct AmbientView: View {
     var body: some View {
         TimelineView(.everyMinute) { context in
             ZStack {
-                Color.black.ignoresSafeArea()
-                VStack(spacing: 28) {
-                    VStack(spacing: 6) {
+                SceneBackdrop(mood: .night, dim: 0.35)
+                VStack(spacing: 34) {
+                    VStack(spacing: 4) {
                         Text(Fmt.clock(context.date))
-                            .font(.system(size: 150, weight: .thin).monospacedDigit())
-                            .foregroundStyle(CC.text.opacity(0.92))
+                            .font(.system(size: 190, weight: .ultraLight).monospacedDigit())
+                            .tracking(-6)
+                            .foregroundStyle(CC.text.opacity(0.94))
                         Text(context.date.formatted(.dateTime.weekday(.wide).day().month(.wide)))
-                            .font(.system(size: 22, weight: .regular))
+                            .font(.system(size: 22, weight: .light))
                             .foregroundStyle(CC.text2)
                     }
-                    HStack(spacing: 44) {
+                    HStack(spacing: 14) {
                         if let bot = model.store.bot, bot.mode != .off {
-                            complication("BOT", Fmt.money(bot.pnlToday, currency: bot.currency, signed: true), CC.pnl(bot.pnlToday))
+                            complication("Bot", Fmt.money(bot.pnlToday, currency: bot.currency, signed: true), CC.pnl(bot.pnlToday))
                         }
                         if let recovery = model.store.whoop?.recovery {
-                            complication("RECOVERY", "\(Int(recovery))%", CC.recovery(recovery))
+                            complication("Recovery", "\(Int(recovery))%", CC.recovery(recovery))
                         }
                         if let event = model.store.calendar?.next(after: context.date) {
-                            complication("NEXT · \(Fmt.clock(event.start))", event.title, CC.text)
+                            complication("Next · \(Fmt.clock(event.start))", event.title, CC.text)
                         }
                         if let weather = model.store.weather {
-                            complication(weather.location.uppercased(), "\(Int(weather.temperature.rounded()))°", CC.text)
+                            complication(weather.location, "\(Int(weather.temperature.rounded()))°", CC.text)
                         }
                     }
-                    .frame(maxWidth: 1000)
+                    .frame(maxWidth: 1040)
                     if case .macAsleep(let name) = model.link.status {
-                        Label("\(name) is asleep", systemImage: "moon.zzz.fill")
-                            .font(.system(size: 15, weight: .medium))
-                            .foregroundStyle(CC.indigo)
+                        HStack(spacing: 10) {
+                            GlossyOrb(color: CC.indigo, size: 10)
+                            Text("\(name) is asleep")
+                        }
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundStyle(CC.text2)
                     }
                 }
             }
@@ -425,14 +445,17 @@ struct AmbientView: View {
     }
 
     private func complication(_ label: String, _ value: String, _ color: Color) -> some View {
-        VStack(spacing: 6) {
+        VStack(alignment: .leading, spacing: 4) {
             SectionLabel(label)
             Text(value)
-                .font(.system(size: 30, weight: .medium).monospacedDigit())
-                .foregroundStyle(color.opacity(0.9))
+                .font(.system(size: 28, weight: .light).monospacedDigit())
+                .foregroundStyle(color.opacity(0.92))
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
         }
-        .frame(maxWidth: 240)
+        .padding(.horizontal, 22)
+        .padding(.vertical, 16)
+        .frame(maxWidth: 250, alignment: .leading)
+        .background(CardBackground(radius: 22))
     }
 }

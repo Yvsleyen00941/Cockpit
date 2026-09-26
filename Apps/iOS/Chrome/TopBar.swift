@@ -1,45 +1,42 @@
 import CCCore
 import SwiftUI
 
-/// 50 pt: connection · what's in front on the Mac · page tabs · pin · clock · settings.
+/// Floats on the scene: the status capsule (connection · what's in front on
+/// the Mac) · the page switcher · edit, pin, the time and settings.
 struct TopBar: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
-        HStack(spacing: 14) {
-            ConnectionBadge()
-            Rectangle().fill(CC.divider).frame(width: 1, height: 24)
-            ContextChip()
-                .frame(maxWidth: 280, alignment: .leading)
+        HStack(spacing: 12) {
+            StatusCapsule()
+                .frame(maxWidth: 400, alignment: .leading)
             Spacer(minLength: 8)
             PageTabs()
             Spacer(minLength: 8)
-            if model.editing {
-                EditingBadge()
-            } else {
-                HStack(spacing: 6) {
-                    BarIconButton(symbol: "square.and.pencil", active: false, help: "Edit layout") {
+            HStack(spacing: 8) {
+                if model.editing {
+                    EditingBadge()
+                } else {
+                    GlassIconButton(symbol: "square.and.pencil", help: "Edit layout") {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) { model.editing = true }
                     }
-                    BarIconButton(symbol: model.navigator.pinned == nil ? "pin" : "pin.fill", active: model.navigator.pinned != nil, help: "Pin this page") {
+                    GlassIconButton(symbol: model.navigator.pinned == nil ? "pin" : "pin.fill", active: model.navigator.pinned != nil, help: "Pin this page") {
                         withAnimation(.snappy) { model.navigator.togglePin() }
                     }
                 }
-            }
-            ClockView()
-            BarIconButton(symbol: "gearshape.fill", active: false, help: "Settings") {
-                model.showSettings = true
+                ClockView()
+                    .padding(.horizontal, 6)
+                GlassIconButton(symbol: "gearshape.fill", help: "Settings") {
+                    model.showSettings = true
+                }
             }
         }
         .padding(.horizontal, 20)
         .frame(height: Metrics.topBar)
-        .background(CC.bg)
-        .overlay(alignment: .bottom) {
-            Rectangle().fill(CC.divider).frame(height: 1)
-        }
     }
 }
 
+/// Kept for callers outside the top bar (editor sheets).
 struct BarIconButton: View {
     let symbol: String
     var active: Bool
@@ -47,22 +44,26 @@ struct BarIconButton: View {
     let action: () -> Void
 
     var body: some View {
-        Button {
-            Feedback.tap()
-            action()
-        } label: {
-            Image(systemName: symbol)
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundStyle(active ? CC.accent : CC.text2)
-                .frame(width: 36, height: 36)
-                .background(Circle().fill(active ? CC.accent.opacity(0.16) : CC.elevated.opacity(0.7)))
-        }
-        .buttonStyle(PressStyle())
-        .accessibilityLabel(help)
+        GlassIconButton(symbol: symbol, active: active, size: 38, help: help, action: action)
     }
 }
 
-// MARK: - Connection
+// MARK: - Status capsule
+
+/// One glass capsule: the connection light and Mac, then the app in front.
+struct StatusCapsule: View {
+    var body: some View {
+        HStack(spacing: 14) {
+            ConnectionBadge()
+            Rectangle().fill(CC.divider).frame(width: 1, height: 26)
+            ContextChip()
+        }
+        .padding(.leading, 16)
+        .padding(.trailing, 18)
+        .frame(height: 50)
+        .background(GlassShape(shape: Capsule(), shadow: false))
+    }
+}
 
 struct ConnectionBadge: View {
     @Environment(AppModel.self) private var model
@@ -71,20 +72,21 @@ struct ConnectionBadge: View {
     var body: some View {
         let link = model.link
         Button { showDetails = true } label: {
-            HStack(spacing: 9) {
-                StatusDot(color: color(link), size: 8, pulsing: !link.status.isConnected)
+            HStack(spacing: 10) {
+                GlossyOrb(color: color(link), size: 11)
+                    .modifier(Breathing(active: !link.status.isConnected))
                 VStack(alignment: .leading, spacing: 1) {
                     Text(link.macName ?? "No Mac")
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.system(size: 13.5, weight: .semibold))
                         .foregroundStyle(CC.text)
                         .lineLimit(1)
                     Text(subtitle(link))
-                        .font(.system(size: 11, weight: .medium).monospacedDigit())
+                        .font(.system(size: 11.5, weight: .medium).monospacedDigit())
                         .foregroundStyle(CC.text2)
                         .lineLimit(1)
                 }
             }
-            .frame(minWidth: 118, alignment: .leading)
+            .fixedSize()
         }
         .buttonStyle(PressStyle(scale: 0.98))
         .popover(isPresented: $showDetails, arrowEdge: .bottom) {
@@ -116,16 +118,29 @@ struct ConnectionBadge: View {
     }
 }
 
+/// A slow glow in and out — something is waiting.
+struct Breathing: ViewModifier {
+    var active: Bool
+    @State private var low = false
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(active && low ? 0.45 : 1)
+            .onAppear {
+                guard active else { return }
+                withAnimation(.easeInOut(duration: 1.1).repeatForever()) { low = true }
+            }
+    }
+}
+
 struct ConnectionDetails: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
         let link = model.link
         VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                Image(systemName: "laptopcomputer")
-                    .font(.system(size: 22))
-                    .foregroundStyle(CC.accent)
+            HStack(spacing: 12) {
+                IconOrb(symbol: "laptopcomputer", tint: CC.accent, size: 40)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(link.macName ?? "No Mac").font(.system(size: 16, weight: .semibold))
                     Text(model.store.helper?.model ?? "ControlCenter Helper").font(.system(size: 12)).foregroundStyle(CC.text2)
@@ -165,21 +180,23 @@ struct ContextChip: View {
 
     var body: some View {
         let context = model.store.context
-        HStack(spacing: 10) {
-            AppIconView(bundleID: context?.bundleID, size: 26)
+        HStack(spacing: 11) {
+            AppIconView(bundleID: context?.bundleID, size: 30)
+                .id(context?.bundleID)
+                .transition(.scale(scale: 0.7).combined(with: .opacity))
             VStack(alignment: .leading, spacing: 1) {
                 Text(context?.appName ?? "—")
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(CC.text)
                     .lineLimit(1)
                 Text(subtitle(context))
-                    .font(.system(size: 11))
+                    .font(.system(size: 11.5))
                     .foregroundStyle(CC.text2)
                     .lineLimit(1)
                     .truncationMode(.middle)
             }
         }
-        .animation(.easeOut(duration: 0.2), value: context?.bundleID)
+        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: context?.bundleID)
     }
 
     private func subtitle(_ context: ActiveContext?) -> String {
@@ -194,7 +211,7 @@ struct ContextChip: View {
 // MARK: - Page tabs
 
 /// Icon tabs for the pinned pages, plus a tab for the current app page. The
-/// selected tab expands to show its name; the highlight slides between tabs.
+/// selected tab becomes a lit cobalt pill with its name; it slides between tabs.
 struct PageTabs: View {
     @Environment(AppModel.self) private var model
     @Namespace private var selection
@@ -207,14 +224,13 @@ struct PageTabs: View {
                 tab(page)
             }
             if let current, !current.pinnedToBar {
-                Rectangle().fill(CC.divider).frame(width: 1, height: 20).padding(.horizontal, 4)
+                Rectangle().fill(CC.divider).frame(width: 1, height: 22).padding(.horizontal, 5)
                 tab(current)
             }
         }
-        .padding(3)
-        .background(Capsule().fill(CC.elevated.opacity(0.55)))
-        .overlay(Capsule().strokeBorder(CC.divider, lineWidth: 1))
-        .animation(.spring(response: 0.32, dampingFraction: 0.82), value: model.navigator.pageID)
+        .padding(4)
+        .background(GlassShape(shape: Capsule(), shadow: false))
+        .animation(.spring(response: 0.34, dampingFraction: 0.82), value: model.navigator.pageID)
     }
 
     private func tab(_ page: Page) -> some View {
@@ -225,27 +241,28 @@ struct PageTabs: View {
         } label: {
             HStack(spacing: 7) {
                 if let bundleID = page.appBundleID {
-                    AppIconView(bundleID: bundleID, size: 18, fallback: page.symbol)
+                    AppIconView(bundleID: bundleID, size: 20, fallback: page.symbol)
                 } else {
                     Image(systemName: page.symbol)
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.system(size: 15, weight: .semibold))
                 }
                 if selected {
                     Text(page.title)
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.system(size: 14, weight: .semibold))
                         .lineLimit(1)
                         .fixedSize()
                         .transition(.opacity.combined(with: .move(edge: .leading)))
                 }
             }
-            .foregroundStyle(selected ? CC.text : CC.text2)
-            .padding(.horizontal, selected ? 12 : 10)
-            .frame(height: 32)
+            .foregroundStyle(selected ? .white : CC.text2)
+            .padding(.horizontal, selected ? 15 : 12)
+            .frame(height: 40)
             .background {
                 if selected {
                     Capsule()
-                        .fill(LinearGradient(colors: [CC.accent.opacity(0.32), CC.accent.opacity(0.2)], startPoint: .top, endPoint: .bottom))
-                        .overlay(Capsule().strokeBorder(CC.accent.opacity(0.45), lineWidth: 1))
+                        .fill(LinearGradient(colors: [Color(hex: 0x6A92FF), Color(hex: 0x3A62F5)], startPoint: .top, endPoint: .bottom))
+                        .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 1))
+                        .glow(Color(hex: 0x3A62F5), spread: 10, opacity: 0.5, y: 4)
                         .matchedGeometryEffect(id: "tab", in: selection)
                 }
             }
@@ -262,18 +279,11 @@ struct EditingBadge: View {
     var body: some View {
         HStack(spacing: 8) {
             Pill(text: "Editing", color: CC.orange, symbol: "square.and.pencil")
-            Button {
+            Button("Done") {
                 Feedback.tap()
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) { model.editing = false }
-            } label: {
-                Text("Done")
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundStyle(Color(hex: 0x0A0A0F))
-                    .padding(.horizontal, 16)
-                    .frame(height: 32)
-                    .background(Capsule().fill(CC.accent))
             }
-            .buttonStyle(PressStyle())
+            .buttonStyle(GlowCapsuleStyle(height: 40))
         }
     }
 }
@@ -283,14 +293,14 @@ struct ClockView: View {
         TimelineView(.everyMinute) { context in
             VStack(alignment: .trailing, spacing: 0) {
                 Text(Fmt.clock(context.date))
-                    .font(.system(size: 19, weight: .semibold).monospacedDigit())
+                    .font(.system(size: 26, weight: .light).monospacedDigit())
+                    .tracking(-0.5)
                     .foregroundStyle(CC.text)
-                Text(context.date.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated)).uppercased())
-                    .font(.system(size: 9.5, weight: .semibold))
-                    .tracking(0.8)
+                Text(context.date.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated)))
+                    .font(.system(size: 11.5, weight: .medium))
                     .foregroundStyle(CC.text2)
             }
         }
-        .frame(minWidth: 64, alignment: .trailing)
+        .frame(minWidth: 70, alignment: .trailing)
     }
 }

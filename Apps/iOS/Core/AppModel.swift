@@ -99,6 +99,13 @@ final class AppModel {
     func start() {
         wire(link)
         link.start()
+        // `-CCPairing` opens the pairing flow even when a Mac is paired (screenshots, testing).
+        if !isDemo, ProcessInfo.processInfo.arguments.contains("-CCPairing") {
+            Task { @MainActor [weak self] in
+                try? await Task.sleep(for: .seconds(0.6))
+                self?.connection.forceShowPairing()
+            }
+        }
         navigator.update(workspace: workspace, store: store)
         navigationTicker = Task { @MainActor [weak self] in
             while !Task.isCancelled {
