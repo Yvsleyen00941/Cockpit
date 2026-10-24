@@ -2,7 +2,7 @@ import CCCore
 import Foundation
 
 /// Open-Meteo — free, keyless, precise enough for "rain from 16:00 in
-/// Wortegem". Refreshed every 30 minutes while watched.
+/// Antwerp". Refreshed every 30 minutes while watched.
 @MainActor
 final class WeatherProvider: PollingProvider {
     override var channels: Set<Channel> { [.weather] }

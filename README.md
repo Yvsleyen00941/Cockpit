@@ -23,7 +23,7 @@ encryption. Nothing touches a cloud.
 | Page | Shows |
 |---|---|
 | **Home** | Four quadrants: bot, recovery, Focus & schedule, Mac & media |
-| **Brief** | 06:00–10:00: greeting, Wortegem weather, recovery, overnight trades, agenda, top 3, **Start the day** |
+| **Brief** | 06:00–10:00: greeting, Antwerp weather, recovery, overnight trades, agenda, top 3, **Start the day** |
 | **Bot** | P&L chart, positions, trade log, health, pause/resume/close-all |
 | **Study** | Lecture-aware: Pomodoro, next lecture, quick-launch and study shortcut keys |
 | **Meeting** | Mute, camera, hand, share, leave, for whichever call app is open |
@@ -121,7 +121,7 @@ dot in the menu bar.
 - **Calendar and Reminders:** EventKit, all calendars, live updates.
 - **Music:** Spotify and Apple Music, with artwork. Track changes arrive
   instantly, and the players are only queried while they're running.
-- **Weather:** Open-Meteo, no key needed. The location is Wortegem by
+- **Weather:** Open-Meteo, no key needed. The location is Antwerp by
   default; change it in **Preferences → Brief & Timers**.
 - **PortTracker:** net worth, movers and turbos from `GET /api/market/standby`.
   Set the base URL and an auth header in **Preferences → PortTracker**.

@@ -257,7 +257,7 @@ public enum DemoData {
         ])
     }
 
-    public static func weather(now: Date, location: String = "Wortegem") -> WeatherState {
+    public static func weather(now: Date, location: String = "Antwerp") -> WeatherState {
         let hour = Calendar.current.dateInterval(of: .hour, for: now)?.start ?? now
         let codes = [2, 2, 3, 3, 61, 61, 80, 3, 2, 1, 1, 0]
         let temps = [13.8, 14.6, 15.2, 15.9, 15.1, 14.4, 14.0, 14.3, 13.6, 12.4, 11.3, 10.6]
@@ -375,7 +375,7 @@ public enum DemoData {
             integrations: [
                 IntegrationStatus(id: .bot, health: .ok, detail: "Simulated"),
                 IntegrationStatus(id: .whoop, health: .ok, detail: "Recovery 78%"),
-                IntegrationStatus(id: .weather, health: .ok, detail: "Wortegem"),
+                IntegrationStatus(id: .weather, health: .ok, detail: "Antwerp"),
                 IntegrationStatus(id: .portfolio, health: .ok, detail: "€48.2K"),
                 IntegrationStatus(id: .calendar, health: .ok, detail: "6 events today"),
                 IntegrationStatus(id: .focus, health: .ok, detail: "3 Focus shortcuts"),
