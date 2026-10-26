@@ -1,6 +1,7 @@
 # Cockpit (Control Center)
 
 [![Website](https://img.shields.io/badge/Website-yorben.me-08090d?style=flat-square&logo=safari)](https://yorben.me)
+[![Architecture Article](https://img.shields.io/badge/Architecture-Read%20Deep%20Dive-black?style=flat-square&logo=safari)](https://yorben.me/articles/building-cockpit-macos-hud.html)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 [![Swift](https://img.shields.io/badge/Swift-5.10%20%7C%206.0-orange?style=flat-square&logo=swift)](https://swift.org)
 [![Platform](https://img.shields.io/badge/Platform-macOS%20%7C%20iPadOS-lightgrey?style=flat-square&logo=apple)](https://yorben.me)
