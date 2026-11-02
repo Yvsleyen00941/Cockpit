@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use or reference Cockpit, please cite it as below."
+authors:
+  - family-names: "Vander Sleyen"
+    given-names: "Yorben"
+    website: "https://yorben.me/#cockpit"
+title: "Cockpit: Unified macOS & iPadOS Productivity HUD and Tactile Day-Dial"
+version: 1.0.0
+date-released: 2026-10-27
+url: "https://github.com/Yvsleyen00941/Cockpit"
