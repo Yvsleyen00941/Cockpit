@@ -1,5 +1,6 @@
 # Cockpit (Control Center)
 
+[![Homebrew](https://img.shields.io/badge/Homebrew-cask-FBB040?style=flat-square&logo=homebrew)](https://github.com/Yvsleyen00941/homebrew-tap)
 [![Website](https://img.shields.io/badge/Website-yorben.me-08090d?style=flat-square&logo=safari)](https://yorben.me)
 [![Architecture Article](https://img.shields.io/badge/Architecture-Read%20Deep%20Dive-black?style=flat-square&logo=safari)](https://yorben.me/articles/building-cockpit-macos-hud.html)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
@@ -36,6 +37,15 @@ encryption. Nothing touches a cloud.
 | **Mac** | CPU per core, memory pressure, battery, processes, app switcher, window tiling |
 | **Markets** | PortTracker net worth, movers, turbos near knockout |
 | **Safari, Xcode, Notion, Terminal, Finder** | The right keys for that app, switched to automatically |
+
+
+## Install via Homebrew
+
+```bash
+brew install --cask Yvsleyen00941/tap/cockpit
+```
+
+Or download the pre-built `.dmg` directly from [Releases](https://github.com/Yvsleyen00941/Cockpit/releases/latest).
 
 How it all fits together, in short:
 
