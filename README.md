@@ -3,6 +3,8 @@
 [![Homebrew](https://img.shields.io/badge/Homebrew-cask-FBB040?style=flat-square&logo=homebrew)](https://github.com/Yvsleyen00941/homebrew-tap)
 [![Website](https://img.shields.io/badge/Website-yorben.me-08090d?style=flat-square&logo=safari)](https://yorben.me)
 [![Architecture Article](https://img.shields.io/badge/Architecture-Read%20Deep%20Dive-black?style=flat-square&logo=safari)](https://yorben.me/articles/building-cockpit-macos-hud.html)
+[![Downloads](https://img.shields.io/github/downloads/Yvsleyen00941/Cockpit/total?style=flat-square&color=28a745&logo=apple)](https://github.com/Yvsleyen00941/Cockpit/releases)
+[![Stars](https://img.shields.io/github/stars/Yvsleyen00941/Cockpit?style=flat-square&color=yellow)](https://github.com/Yvsleyen00941/Cockpit/stargazers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 [![Swift](https://img.shields.io/badge/Swift-5.10%20%7C%206.0-orange?style=flat-square&logo=swift)](https://swift.org)
 [![Platform](https://img.shields.io/badge/Platform-macOS%20%7C%20iPadOS-lightgrey?style=flat-square&logo=apple)](https://yorben.me)
