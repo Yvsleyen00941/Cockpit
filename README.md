@@ -223,3 +223,8 @@ The wire protocol is in [docs/PROTOCOL.md](docs/PROTOCOL.md).
   app.
 - **The USB-C bridge** follows Apple's usbmux protocol but hasn't been tested
   against a physical iPad yet. Wi-Fi remains the default path.
+
+## Also by Yorben
+
+- **[Tape](https://github.com/Yvsleyen00941/Tape)** — Stock ticker for macOS in the empty corner beside the Dock.
+- **[Rime](https://github.com/Yvsleyen00941/Rime)** — Distraction-free reading engine for PDF, EPUB, and Markdown with typography-first continuous layout.
